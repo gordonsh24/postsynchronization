@@ -8,21 +8,21 @@ use WPML\FP\Maybe;
 
 class Mapper {
 
-	private static $postIdOptionName = 'post-synchronization-post-ids-map';
+	CONST POST_IDS_MAP = 'post-synchronization-post-ids-map';
 
 	/**
 	 * @param int $sourcePostId
 	 * @param array $targetPostIds [siteName -> ids]
 	 */
 	public static function savePostIdsMapping( int $sourcePostId, array $targetPostIds ) {
-		$map                 = get_option( self::$postIdOptionName, [] );
+		$map                 = get_option( self::POST_IDS_MAP, [] );
 		$map[ $sourcePostId ] = $targetPostIds;
-		update_option( self::$postIdOptionName, $map );
+		update_option( self::POST_IDS_MAP, $map );
 	}
 
 
 	public static function getTargetPostId( int $sourcePostId, string $siteName ): Maybe {
-		$map = get_option( self::$postIdOptionName, [] );
+		$map = get_option( self::POST_IDS_MAP, [] );
 
 		return Maybe::fromNullable( $map[ $sourcePostId ][ $siteName ] ?? null );
 	}

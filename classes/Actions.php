@@ -6,6 +6,9 @@ namespace PostSynchronization;
 
 use WPML\FP\Curryable;
 use WPML\FP\Either;
+use WPML\FP\Obj;
+use WPML\FP\Relation;
+use function WPML\FP\pipe;
 
 /**
  * Class Actions
@@ -15,7 +18,7 @@ use WPML\FP\Either;
  *
  * @method static callable|Either update( ...$siteData, $targetPostId, ...$post ): Curried :: SiteData->int->\WP_Post->Either
  *
- * @method static callable|Either delete( ...$siteData, $targetPostId, ...$post ): Curried :: SiteData->int->\WP_Post->Either
+ * @method static callable|Either delete( ...$siteData, $targetPostId ): Curried :: SiteData->int->Either
  */
 class Actions {
 	use Curryable;
@@ -34,17 +37,20 @@ class Actions {
 				'body'    => Mapper::postData( $post ),
 			] );
 
-			if ( is_wp_error( $response ) || wp_remote_retrieve_response_message( $response ) !== 'Created' ) {
-				return Either::left( $response );
-			}
+			$saveInMap = function ( $body ) use ( $post, $siteData ) {
+				Mapper::savePostIdsMapping( $post->ID, [ $siteData->name => $body->id ] );
 
-			$response['body'] = json_decode( $response['body'] );
-			Mapper::savePostIdsMapping( $post->ID, [ $siteData->name => $response['body']->id ] );
+				return $body;
+			};
 
-			return Either::right( $response );
+			return Either::of( $response )
+			             ->filter( pipe( 'wp_remote_retrieve_response_message', Relation::equals( 'Created' ) ) )
+			             ->map( Obj::prop( 'body' ) )
+			             ->map( 'json_decode' )
+			             ->map( $saveInMap );
 		} );
 
-		self::curryN( 'update', 3, function ( SiteData $siteData, int $targetPostId , \WP_Post $post ) {
+		self::curryN( 'update', 3, function ( SiteData $siteData, int $targetPostId, \WP_Post $post ) {
 			$response = wp_remote_post( $siteData->url . '/wp-json/wp/v2/posts/' . $targetPostId, [
 				'headers' => [
 					'Authorization' => self::buildAuth( $siteData ),
@@ -52,10 +58,10 @@ class Actions {
 				'body'    => Mapper::postData( $post ),
 			] );
 
-			return is_wp_error( $response ) ? Either::left( $response ) : Either::right( $response );
+			return wp_remote_retrieve_response_message( $response ) !== 'OK' ? Either::left( $response ) : Either::right( $response );
 		} );
 
-		self::curryN( 'delete', 3, function ( SiteData $siteData, int $targetPostId, \WP_Post $post  ) {
+		self::curryN( 'delete', 2, function ( SiteData $siteData, int $targetPostId ) {
 			$response = wp_remote_post( $siteData->url . '/wp-json/wp/v2/posts/' . $targetPostId, [
 				'headers' => [
 					'Authorization' => self::buildAuth( $siteData ),
@@ -63,7 +69,7 @@ class Actions {
 				'method'  => 'DELETE',
 			] );
 
-			return is_wp_error( $response ) ? Either::left( $response ) : Either::right( $response );
+			return wp_remote_retrieve_response_message( $response ) !== 'OK' ? Either::left( $response ) : Either::right( $response );
 		} );
 	}
 

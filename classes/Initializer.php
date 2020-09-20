@@ -31,7 +31,9 @@ class Initializer {
 		$targetId = Mapper::getTargetPostId( $post->ID, $siteData->name );
 		if ( \WPML\FP\Fns::isJust( $targetId ) ) {
 			if ( $post->post_status === 'trash' ) {
-				$action = Actions::delete( $siteData, $targetId->get() );
+				$action = function () use ( $siteData, $targetId ) {
+					return Actions::delete( $siteData, $targetId->get() );
+				};
 			} else {
 				$action = Actions::update( $siteData, $targetId->get() );
 			}
