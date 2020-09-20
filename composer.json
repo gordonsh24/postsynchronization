@@ -18,7 +18,8 @@
   "minimum-stability": "dev",
   "prefer-stable": true,
   "require": {
-    "wpml/fp": "dev-develop"
+    "wpml/fp": "dev-develop",
+    "wpml/collect": "dev-wpml-collect-rename"
   },
   "require-dev": {
     "phpunit/phpunit": "^9"
