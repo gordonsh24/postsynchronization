@@ -1,18 +1,18 @@
 <?php
 /**
- * @package GdzieNaZabieg
+ * @package PostSynchronization
  */
 /*
-Plugin Name: GdzieNaZabieg
-Description: It provides set of custom functionalities used by gdzienazabieg.com website
+Plugin Name: Post synchronization
+Description: It allows syncing posts between different sites
 Version: 0.0.1
 Author: Jakub Bis
-Text Domain: gdzienazabieg
+Text Domain: postsynchronization
 */
 
 require_once 'vendor/autoload.php';
 
-$siteData           = new \GdzieNaZabieg\PostSynchronization\SiteData();
+$siteData           = new \PostSynchronization\SiteData();
 $siteData->url      = 'http://gdzienazabieg.test/';
 $siteData->user     = 'admin';
 $siteData->password = 'password';
@@ -20,8 +20,8 @@ $siteData->password = 'password';
 add_action( 'save_post_post', function ( $postId, \WP_Post $post, $update ) use ( $siteData ) {
 
 	$action = $update ?
-		\GdzieNaZabieg\PostSynchronization\Actions::update( $siteData ) :
-		\GdzieNaZabieg\PostSynchronization\Actions::create( $siteData );
+		\PostSynchronization\Actions::update( $siteData ) :
+		\PostSynchronization\Actions::create( $siteData );
 
 	/** @var \WPML\FP\Either $result */
 	$result = $action( $post );

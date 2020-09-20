@@ -1,7 +1,7 @@
 <?php
 
 
-namespace GdzieNaZabieg\PostSynchronization;
+namespace PostSynchronization;
 
 
 use WPML\FP\Curryable;
@@ -9,7 +9,7 @@ use WPML\FP\Either;
 
 /**
  * Class Actions
- * @package GdzieNaZabieg\PostSynchronization
+ * @package PostSynchronization
  *
  * @method static callable|Either create( ...$siteData, ...$post ): Curried :: SiteData->\WP_Post->Either
  *
