@@ -127,6 +127,7 @@ class ActionsTest extends \WP_Mock\Tools\TestCase {
 	 * @test
 	 */
 	public function it_deletes_post() {
+		$post         = $this->createPost();
 		$siteData     = SiteData::create( [ 'name' => 'my site', 'url' => 'http://develop.test', 'user' => 'admin', 'password' => 'password' ] );
 		$targetPostId = 123;
 		$response     = [ 'response' => [ 'message' => 'OK', 'code' => 200 ] ];
@@ -138,16 +139,17 @@ class ActionsTest extends \WP_Mock\Tools\TestCase {
 			'return' => "OK",
 		] );
 
-		$result = Actions::delete( $siteData, $targetPostId );
+		$result = Actions::delete( $siteData, $targetPostId, $post );
 
 		$this->assertTrue( Fns::isRight( $result ) );
 		$this->assertEquals( $response, $result->get() );
 	}
 
 	/**
-	* @test
-	*/
+	 * @test
+	 */
 	public function post_delete_fails() {
+		$post         = $this->createPost();
 		$siteData     = SiteData::create( [ 'name' => 'my site', 'url' => 'http://develop.test', 'user' => 'admin', 'password' => 'password' ] );
 		$targetPostId = 123;
 		$response     = [ 'response' => [ 'message' => 'Err', 'code' => 400 ] ];
@@ -159,7 +161,7 @@ class ActionsTest extends \WP_Mock\Tools\TestCase {
 			'return' => "Err",
 		] );
 
-		$result = Actions::delete( $siteData, $targetPostId );
+		$result = Actions::delete( $siteData, $targetPostId, $post );
 
 		$this->assertTrue( Fns::isLeft( $result ) );
 		$this->assertEquals( $response, $result->orElse( Fns::identity() )->get() );
@@ -177,7 +179,7 @@ class ActionsTest extends \WP_Mock\Tools\TestCase {
 						'title'      => $post->post_title,
 						'status'     => $post->post_status,
 						'content'    => $post->post_content,
-						'categories' => 3,
+						'categories' => 1,
 						'excerpt'    => $post->post_excerpt,
 					],
 				]
@@ -198,7 +200,7 @@ class ActionsTest extends \WP_Mock\Tools\TestCase {
 						'title'      => $post->post_title,
 						'status'     => $post->post_status,
 						'content'    => $post->post_content,
-						'categories' => 3,
+						'categories' => 1,
 						'excerpt'    => $post->post_excerpt,
 					],
 				]
@@ -230,6 +232,7 @@ class ActionsTest extends \WP_Mock\Tools\TestCase {
 		$post->post_status  = 'published';
 		$post->post_content = 'Some content';
 		$post->post_excerpt = 'Some excerpt';
+		$post->post_type    = 'post';
 
 		return $post;
 	}

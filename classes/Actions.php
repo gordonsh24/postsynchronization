@@ -27,10 +27,18 @@ class Actions {
 		return 'Basic ' . base64_encode( $siteData->user . ':' . $siteData->password );
 	}
 
+	private static function createUrl( SiteData $siteData, \WP_Post $post ) {
+		return sprintf( '%s/wp-json/wp/v2/%ss', $siteData->url, $post->post_type );
+	}
+
+	private static function updateUrl( SiteData $siteData, int $targetPostId, \WP_Post $post ) {
+		return sprintf( '%s/wp-json/wp/v2/%ss/%d', $siteData->url, $post->post_type, $targetPostId );
+	}
+
 	public static function init() {
 
 		self::curryN( 'create', 2, function ( SiteData $siteData, \WP_Post $post ) {
-			$response = wp_remote_post( $siteData->url . '/wp-json/wp/v2/posts', [
+			$response = wp_remote_post( self::createUrl( $siteData, $post ), [
 				'headers' => [
 					'Authorization' => self::buildAuth( $siteData ),
 				],
@@ -51,7 +59,7 @@ class Actions {
 		} );
 
 		self::curryN( 'update', 3, function ( SiteData $siteData, int $targetPostId, \WP_Post $post ) {
-			$response = wp_remote_post( $siteData->url . '/wp-json/wp/v2/posts/' . $targetPostId, [
+			$response = wp_remote_post( self::updateUrl( $siteData, $targetPostId, $post ), [
 				'headers' => [
 					'Authorization' => self::buildAuth( $siteData ),
 				],
@@ -61,8 +69,8 @@ class Actions {
 			return wp_remote_retrieve_response_message( $response ) !== 'OK' ? Either::left( $response ) : Either::right( $response );
 		} );
 
-		self::curryN( 'delete', 2, function ( SiteData $siteData, int $targetPostId ) {
-			$response = wp_remote_post( $siteData->url . '/wp-json/wp/v2/posts/' . $targetPostId, [
+		self::curryN( 'delete', 3, function ( SiteData $siteData, int $targetPostId, \WP_Post $post) {
+			$response = wp_remote_post( self::updateUrl( $siteData, $targetPostId, $post ), [
 				'headers' => [
 					'Authorization' => self::buildAuth( $siteData ),
 				],

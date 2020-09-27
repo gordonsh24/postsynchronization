@@ -5,13 +5,14 @@ namespace PostSynchronization;
 
 use WPML\FP\Fns;
 use WPML\FP\Logic;
+use WPML\FP\Lst;
 use WPML\FP\Relation;
 
 class OnPostSave {
 
 	public static function onPostSave( callable $createAction, callable $updateAction, callable $deleteAction, callable $getSiteConfiguration, callable $getTargetPostId ) {
 		return function ( $postId, \WP_Post $post ) use ( $createAction, $updateAction, $deleteAction, $getSiteConfiguration, $getTargetPostId ) {
-			if ( $post->post_status === 'auto-draft' ) {
+			if ( Lst::includes( $post->post_status, [ 'auto-draft', 'revision' ] ) ) {
 				return null;
 			}
 

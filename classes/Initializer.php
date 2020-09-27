@@ -10,16 +10,12 @@ class Initializer {
 		$onPostSave = OnPostSave::onPostSave(
 			Actions::create(),
 			Actions::update(),
-			function ( SiteData $siteData, int $targetPostId ) {
-				return function () use ( $siteData, $targetPostId ) {
-					return Actions::delete( $siteData, $targetPostId );
-				};
-			},
+			Actions::delete(),
 			[ self::class, 'getSitesConfiguration' ],
 			[ Mapper::class, 'getTargetPostId' ],
 		);
 
-		add_action( 'save_post_post', $onPostSave, 10, 2 );
+		add_action( 'save_post', $onPostSave, 10, 2 );
 	}
 
 	/**

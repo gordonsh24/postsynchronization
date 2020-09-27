@@ -32,7 +32,7 @@ class Mapper {
 			'title'      => $post->post_title,
 			'status'     => $post->post_status,
 			'content'    => $post->post_content,
-			'categories' => 3,
+			'categories' => 1,
 			'excerpt'    => $post->post_excerpt,
 		];
 	}
