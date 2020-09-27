@@ -53,7 +53,7 @@ class OnPostSaveTest extends \WP_Mock\Tools\TestCase {
 		);
 		$result     = $onPostSave( $post->ID, $post );
 
-		$this->assertEquals( Either::of( 'nothing' ), $result );
+		$this->assertNull( $result );
 		$errorLog->wasNotCalled();
 	}
 
@@ -90,7 +90,7 @@ class OnPostSaveTest extends \WP_Mock\Tools\TestCase {
 		);
 		$result     = $onPostSave( $post->ID, $post );
 
-		$this->assertEquals( Either::of( 'created' ), $result );
+		$this->assertEquals( 'created', $result );
 		$errorLog->wasNotCalled();
 	}
 
@@ -127,7 +127,7 @@ class OnPostSaveTest extends \WP_Mock\Tools\TestCase {
 		);
 		$result     = $onPostSave( $post->ID, $post );
 
-		$this->assertEquals( Either::of( 'updated' ), $result );
+		$this->assertEquals( 'updated', $result );
 		$errorLog->wasNotCalled();
 	}
 
@@ -164,7 +164,7 @@ class OnPostSaveTest extends \WP_Mock\Tools\TestCase {
 		);
 		$result     = $onPostSave( $post->ID, $post );
 
-		$this->assertEquals( Either::of( 'deleted' ), $result );
+		$this->assertEquals( 'deleted', $result );
 		$errorLog->wasNotCalled();
 	}
 
@@ -201,7 +201,7 @@ class OnPostSaveTest extends \WP_Mock\Tools\TestCase {
 		);
 		$result     = $onPostSave( $post->ID, $post );
 
-		$this->assertEquals( Either::left( 'error' ), $result );
+		$this->assertEquals( 'error', $result );
 		$errorLog->wasCalledWithOnce( [ 'error' ] );
 	}
 
