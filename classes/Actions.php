@@ -16,9 +16,9 @@ use function WPML\FP\pipe;
  *
  * @method static callable|Either create( ...$siteData, ...$post ): Curried :: SiteData->\WP_Post->Either
  *
- * @method static callable|Either update( ...$siteData, $targetPostId, ...$post ): Curried :: SiteData->int->\WP_Post->Either
+ * @method static callable|Either update( ...$siteData, ...$targetPostId, ...$post ): Curried :: SiteData->int->\WP_Post->Either
  *
- * @method static callable|Either delete( ...$siteData, $targetPostId ): Curried :: SiteData->int->Either
+ * @method static callable|Either delete( ...$siteData, ...$targetPostId ): Curried :: SiteData->int->Either
  */
 class Actions {
 	use Curryable;
