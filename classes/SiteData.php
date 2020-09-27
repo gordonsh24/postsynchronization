@@ -16,13 +16,17 @@ class SiteData {
 	/** @var string */
 	public $password;
 
+	/** @var array */
+	public $categoriesMap = [];
+
 	public static function create( array $data ): SiteData {
 		$result = new self();
 
-		$result->name     = $data['name'] ?? null;
-		$result->url      = $data['url'] ?? null;
-		$result->user     = $data['user'] ?? null;
-		$result->password = $data['password'] ?? null;
+		$result->name          = $data['name'] ?? null;
+		$result->url           = $data['url'] ?? null;
+		$result->user          = $data['user'] ?? null;
+		$result->password      = $data['password'] ?? null;
+		$result->categoriesMap = $data['categoriesMap'] ?? null;
 
 		return $result;
 	}

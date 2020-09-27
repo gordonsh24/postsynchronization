@@ -8,6 +8,9 @@ class ActionsTest extends \WP_Mock\Tools\TestCase {
 	public function setUp(): void {
 		parent::setUp();
 		\WP_Mock::setUp();
+
+		\WP_Mock::userFunction( 'wp_get_post_categories', [ 'return' => [] ] );
+		\WP_Mock::userFunction( 'is_wp_error', [ 'return' => false ] );
 	}
 
 	public function tearDown(): void {
@@ -18,6 +21,7 @@ class ActionsTest extends \WP_Mock\Tools\TestCase {
 
 	/**
 	 * @test
+	 * @group jakub
 	 */
 	public function it_creates_post() {
 		$post     = $this->createPost();
@@ -179,7 +183,7 @@ class ActionsTest extends \WP_Mock\Tools\TestCase {
 						'title'      => $post->post_title,
 						'status'     => $post->post_status,
 						'content'    => $post->post_content,
-						'categories' => 1,
+						'categories' => "1",
 						'excerpt'    => $post->post_excerpt,
 					],
 				]

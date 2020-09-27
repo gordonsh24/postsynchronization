@@ -42,7 +42,7 @@ class Actions {
 				'headers' => [
 					'Authorization' => self::buildAuth( $siteData ),
 				],
-				'body'    => Mapper::postData( $post ),
+				'body'    => Mapper::postData( $post , $siteData),
 			] );
 
 			$saveInMap = function ( $body ) use ( $post, $siteData ) {
@@ -63,7 +63,7 @@ class Actions {
 				'headers' => [
 					'Authorization' => self::buildAuth( $siteData ),
 				],
-				'body'    => Mapper::postData( $post ),
+				'body'    => Mapper::postData( $post, $siteData ),
 			] );
 
 			return wp_remote_retrieve_response_message( $response ) !== 'OK' ? Either::left( $response ) : Either::right( $response );
