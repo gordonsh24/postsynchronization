@@ -2,217 +2,156 @@
 
 namespace PostSynchronization;
 
-use WPML\FP\Either;
-use WPML\FP\Fns;
-use WPML\FP\Math;
-use WPML\FP\Maybe;
-use function WPML\FP\curryN;
-use tad\FunctionMocker\FunctionMocker;
+use PostSynchronization\Mocks\CategoriesMock;
+use PostSynchronization\Mocks\MediaMock;
+use PostSynchronization\Mocks\RemotePostMock;
+use WPML\LIB\WP\OptionMock;
+use WPML\LIB\WP\PostMock;
 
 class OnPostSaveTest extends \WP_Mock\Tools\TestCase {
+	use PostMock;
+	use OptionMock;
+	use RemotePostMock;
+	use MediaMock;
+	use CategoriesMock;
+
 	public function setUp(): void {
 		parent::setUp();
 		\WP_Mock::setUp();
+
+		$this->setUpPostMock();
+		$this->setUpOptionMock();
+		$this->setUpRemotePostMock();
+		$this->setUpMediaMock();
+		$this->setUpCategories();
+
+		! defined( 'POST_SYNC_SITES' ) && define( 'POST_SYNC_SITES', [
+			[
+				'name'          => 'gdzienazabieg',
+				'url'           => 'http://gdzienazabieg.test/',
+				'user'          => 'admin',
+				'password'      => 'password',
+				'categoriesMap' => [
+					2 => 4,
+					3 => 2,
+				],
+			],
+			[
+				'name'          => 'develop',
+				'url'           => 'http://develop.test/',
+				'user'          => 'admin',
+				'password'      => 'password',
+				'categoriesMap' => [],
+			]
+		] );
+
+		\WP_Mock::userFunction( 'is_wp_error', [
+			'return' => function ( $param ) {
+				return $param instanceof \WP_Error;
+			}
+		] );
 	}
 
 	public function tearDown(): void {
 		parent::tearDown();
 		\WP_Mock::tearDown();
+
+		$_POST = [];
 	}
 
 	/**
 	 * @test
 	 */
-	public function it_does_nothing_if_it_is_draft_post() {
-		$post              = $this->getMockBuilder( '\WP_Post' )->getMock();
-		$post->ID          = 12;
-		$post->post_status = 'auto-draft';
+	public function it_creates_target_post() {
+		$post = $this->createSamplePost();
 
-		$createAction = curryN( 2, function ( $siteData, $post ) {
-			return Either::of( 'created' );
-		} );
-		$updateAction = curryN( 3, function ( $siteData, $targetPostId, $post ) {
-			return Either::of( 'updated' );
-		} );
-		$deleteAction = curryN( 3, function ( $siteData, $targetPostId, $post ) {
-			return Either::of( 'deleted' );
-		} );
+		$_POST = [ 'some' => 'data' ];
 
-		$getTargetPostIdMock = function ( $postId, $siteName ) {
-			return Maybe::nothing();
-		};
+		update_post_meta( $post->ID, PostSynchronizationSettings::OPTION_NAME, [ 'gdzienazabieg' ] );
 
-		$errorLog = FunctionMocker::replace( 'error_log' );
-
-		$onPostSave = OnPostSave::onPostSave(
-			$createAction,
-			$updateAction,
-			$deleteAction,
-			$this->getSiteConfigMock(),
-			$getTargetPostIdMock
+		$this->expectRemotePost(
+			'http://gdzienazabieg.test//wp-json/wp/v2/posts',
+			[
+				'Authorization' => 'Basic ' . base64_encode( 'admin:password' )
+			],
+			[
+				'title'          => $post->post_title,
+				'status'         => $post->post_status,
+				'content'        => $post->post_content,
+				'categories'     => '1',
+				'excerpt'        => $post->post_excerpt,
+				'featured_media' => 0,
+			],
+			[
+				'response' => [
+					'status'  => 'OK',
+					'message' => 'Created',
+				],
+				'body'     => json_encode( [
+					'id' => $post->ID + 100,
+				] ),
+			]
 		);
-		$result     = $onPostSave( $post->ID, $post );
 
-		$this->assertNull( $result );
-		$errorLog->wasNotCalled();
+		$handler = OnPostSave::onPostSave();
+		$handler( $post->ID, $post );
+
+		$expectedMap = [ $post->ID => [ 'gdzienazabieg' => $post->ID + 100 ] ];
+		$this->assertEquals( $expectedMap, get_option( Mapper::POST_IDS_MAP ) );
 	}
 
 	/**
 	 * @test
 	 */
-	public function it_performs_create_action() {
-		$post              = $this->getMockBuilder( '\WP_Post' )->getMock();
-		$post->ID          = 12;
-		$post->post_status = 'published';
+	public function it_maps_categories() {
+		$post = $this->createSamplePost();
+		$this->setPostCategories( $post->ID, [ 5, 2, 3 ] );
 
-		$createAction = curryN( 2, function ( $siteData, $post ) {
-			return Either::of( 'created' );
-		} );
-		$updateAction = curryN( 3, function ( $siteData, $targetPostId, $post ) {
-			return Either::of( 'updated' );
-		} );
-		$deleteAction = curryN( 3, function ( $siteData, $targetPostId, $post ) {
-			return Either::of( 'deleted' );
-		} );
+		$_POST = [ 'some' => 'data' ];
 
-		$getTargetPostIdMock = function ( $postId, $siteName ) {
-			return Maybe::nothing();
-		};
+		update_post_meta( $post->ID, PostSynchronizationSettings::OPTION_NAME, [ 'gdzienazabieg' ] );
 
-		$errorLog = FunctionMocker::replace( 'error_log' );
-
-		$onPostSave = OnPostSave::onPostSave(
-			$createAction,
-			$updateAction,
-			$deleteAction,
-			$this->getSiteConfigMock(),
-			$getTargetPostIdMock
+		$this->expectRemotePost(
+			'http://gdzienazabieg.test//wp-json/wp/v2/posts',
+			[
+				'Authorization' => 'Basic ' . base64_encode( 'admin:password' )
+			],
+			[
+				'title'          => $post->post_title,
+				'status'         => $post->post_status,
+				'content'        => $post->post_content,
+				'categories'     => '1,4,2',
+				'excerpt'        => $post->post_excerpt,
+				'featured_media' => 0,
+			],
+			[
+				'response' => [
+					'status'  => 'OK',
+					'message' => 'Created',
+				],
+				'body'     => json_encode( [
+					'id' => $post->ID + 100,
+				] ),
+			]
 		);
-		$result     = $onPostSave( $post->ID, $post );
 
-		$this->assertEquals( 'created', $result );
-		$errorLog->wasNotCalled();
+		$handler = OnPostSave::onPostSave();
+		$handler( $post->ID, $post );
+
+		$expectedMap = [ $post->ID => [ 'gdzienazabieg' => $post->ID + 100 ] ];
+		$this->assertEquals( $expectedMap, get_option( Mapper::POST_IDS_MAP ) );
 	}
 
-	/**
-	 * @test
-	 */
-	public function it_performs_update_action() {
-		$post              = $this->getMockBuilder( '\WP_Post' )->getMock();
-		$post->ID          = 12;
-		$post->post_status = 'published';
+	private function createSamplePost() {
+		$post               = $this->getMockBuilder( '\WP_Post' )->getMock();
+		$post->ID           = 10;
+		$post->post_title   = 'My post';
+		$post->post_status  = 'publish';
+		$post->post_type    = 'post';
+		$post->post_content = 'some content';
+		$post->post_excerpt = 'some excerpt';
 
-		$createAction = curryN( 2, function ( $siteData, $post ) {
-			return Either::of( 'created' );
-		} );
-		$updateAction = curryN( 3, function ( $siteData, $targetPostId, $post ) {
-			return Either::of( 'updated' );
-		} );
-		$deleteAction = curryN( 3, function ( $siteData, $targetPostId, $post ) {
-			return Either::of( 'deleted' );
-		} );
-
-		$getTargetPostIdMock = function ( $postId, $siteName ) {
-			return Maybe::just( $postId + 10 );
-		};
-
-		$errorLog = FunctionMocker::replace( 'error_log' );
-
-		$onPostSave = OnPostSave::onPostSave(
-			$createAction,
-			$updateAction,
-			$deleteAction,
-			$this->getSiteConfigMock(),
-			$getTargetPostIdMock
-		);
-		$result     = $onPostSave( $post->ID, $post );
-
-		$this->assertEquals( 'updated', $result );
-		$errorLog->wasNotCalled();
+		return $post;
 	}
 
-	/**
-	 * @test
-	 */
-	public function it_performs_delete_action() {
-		$post              = $this->getMockBuilder( '\WP_Post' )->getMock();
-		$post->ID          = 12;
-		$post->post_status = 'trash';
-
-		$createAction = curryN( 2, function ( $siteData, $post ) {
-			return Either::of( 'created' );
-		} );
-		$updateAction = curryN( 3, function ( $siteData, $targetPostId, $post ) {
-			return Either::of( 'updated' );
-		} );
-		$deleteAction = curryN( 3, function ( $siteData, $targetPostId, $post ) {
-			return Either::of( 'deleted' );
-		} );
-
-		$getTargetPostIdMock = function ( $postId, $siteName ) {
-			return Maybe::just( $postId + 10 );
-		};
-
-		$errorLog = FunctionMocker::replace( 'error_log' );
-
-		$onPostSave = OnPostSave::onPostSave(
-			$createAction,
-			$updateAction,
-			$deleteAction,
-			$this->getSiteConfigMock(),
-			$getTargetPostIdMock
-		);
-		$result     = $onPostSave( $post->ID, $post );
-
-		$this->assertEquals( 'deleted', $result );
-		$errorLog->wasNotCalled();
-	}
-
-	/**
-	 * @test
-	 */
-	public function it_logs_error() {
-		$post              = $this->getMockBuilder( '\WP_Post' )->getMock();
-		$post->ID          = 12;
-		$post->post_status = 'published';
-
-		$createAction = curryN( 2, function ( $siteData, $post ) {
-			return Either::left( 'error' );
-		} );
-		$updateAction = curryN( 3, function ( $siteData, $targetPostId, $post ) {
-			return Either::of( 'updated' );
-		} );
-		$deleteAction = curryN( 3, function ( $siteData, $targetPostId, $post ) {
-			return Either::of( 'deleted' );
-		} );
-
-		$getTargetPostIdMock = function ( $postId, $siteName ) {
-			return Maybe::nothing();
-		};
-
-		$errorLog = FunctionMocker::replace( 'error_log' );
-
-		$onPostSave = OnPostSave::onPostSave(
-			$createAction,
-			$updateAction,
-			$deleteAction,
-			$this->getSiteConfigMock(),
-			$getTargetPostIdMock
-		);
-		$result     = $onPostSave( $post->ID, $post );
-
-		$this->assertEquals( 'error', $result );
-		$errorLog->wasCalledWithOnce( [ 'error' ] );
-	}
-
-	private function getSiteConfigMock() {
-		return Fns::always( [
-			SiteData::create( [
-				'name'     => 'my_site_1',
-				'url'      => 'http:/my_site_1.com',
-				'user'     => 'admin',
-				'password' => '123',
-			] )
-		] );
-	}
 }

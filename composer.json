@@ -19,6 +19,7 @@
   "prefer-stable": true,
   "require": {
     "wpml/fp": "dev-develop",
+    "wpml/wp": "dev-develop",
     "wpml/collect": "dev-wpml-collect-rename"
   },
   "require-dev": {

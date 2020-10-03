@@ -11,6 +11,13 @@ WP_Mock::bootstrap();
 
 use tad\FunctionMocker\FunctionMocker;
 
+require_once WP_PLUGIN_DIR . '/vendor/wpml/wp/tests/mocks/OptionMock.php';
+require_once WP_PLUGIN_DIR . '/vendor/wpml/wp/tests/mocks/PostMock.php';
+
+require_once './mocks/RemotePostMock.php';
+require_once './mocks/MediaMock.php';
+require_once './mocks/CategoriesMock.php';
+
 FunctionMocker::init(
 	[
 		'blacklist' => [

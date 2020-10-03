@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "972731565afd23b5d16d48ab5013e95c",
+    "content-hash": "00e03c2f75d13273bee2b551a41415fc",
     "packages": [
         {
             "name": "wpml/collect",
@@ -80,6 +80,40 @@
             },
             "notification-url": "https://packagist.org/downloads/",
             "time": "2020-09-12T02:31:45+00:00"
+        },
+        {
+            "name": "wpml/wp",
+            "version": "dev-develop",
+            "source": {
+                "type": "git",
+                "url": "https://git.onthegosystems.com/wpml-packages/wp.git",
+                "reference": "5681fdffe1f33b9bc218e0b614a595a2e0083f92"
+            },
+            "require-dev": {
+                "antecedent/patchwork": "^2.0",
+                "otgs/unit-tests-framework": "~1.2.0",
+                "wpml/collect": "dev-wpml-collect-rename",
+                "wpml/fp": "dev-develop"
+            },
+            "type": "library",
+            "autoload": {
+                "classmap": [
+                    "classes/"
+                ],
+                "files": []
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "MIT"
+            ],
+            "authors": [
+                {
+                    "name": "Bruce Pearson",
+                    "email": "bruce@onthegosystems.com"
+                }
+            ],
+            "description": "Class and utilities to interface with WordPress from WPML",
+            "time": "2020-10-01T01:59:27+00:00"
         }
     ],
     "packages-dev": [
@@ -2361,6 +2395,7 @@
     "minimum-stability": "dev",
     "stability-flags": {
         "wpml/fp": 20,
+        "wpml/wp": 20,
         "wpml/collect": 20
     },
     "prefer-stable": true,
