@@ -73,7 +73,6 @@ class Mapper {
 		};
 
 		return \wpml_collect( $categories )
-			->pluck( 'term_id' )
 			->map( $map )
 			->unique()
 			->implode( ',' );
