@@ -35,6 +35,29 @@ class Actions {
 		return sprintf( '%s/wp-json/wp/v2/%ss/%d', $siteData->url, $post->post_type, $targetPostId );
 	}
 
+	private static function synchronizeFeatureImage( SiteData $siteData, \WP_Post $post) {
+		$sourceMediaId = get_post_thumbnail_id( $post );
+		if ( ! $sourceMediaId ) {
+			return 0;
+		}
+
+		$targetMediaId = Mapper::getMediaId( $sourceMediaId, $siteData->name )->getOrElse( null );
+		if ( $targetMediaId ) {
+			return $targetMediaId;
+		}
+
+		$response = Image::send( $siteData, $sourceMediaId );
+
+		$targetMediaId = Obj::propOr(null, 'id', $response);
+		if ( ! $targetMediaId ) {
+			return 0;
+		}
+
+		Mapper::saveMediaIdsMapping( $sourceMediaId, $siteData->name, $targetMediaId );
+
+		return $targetMediaId;
+	}
+
 	public static function init() {
 
 		self::curryN( 'create', 2, function ( SiteData $siteData, \WP_Post $post ) {
@@ -42,7 +65,7 @@ class Actions {
 				'headers' => [
 					'Authorization' => self::buildAuth( $siteData ),
 				],
-				'body'    => Mapper::postData( $post , $siteData),
+				'body' => Mapper::postData( $post, $siteData, self::synchronizeFeatureImage( $siteData, $post ) ),
 			] );
 
 			$saveInMap = function ( $body ) use ( $post, $siteData ) {
@@ -63,7 +86,7 @@ class Actions {
 				'headers' => [
 					'Authorization' => self::buildAuth( $siteData ),
 				],
-				'body'    => Mapper::postData( $post, $siteData ),
+				'body'    => Mapper::postData( $post, $siteData, self::synchronizeFeatureImage( $siteData, $post ) ),
 			] );
 
 			return wp_remote_retrieve_response_message( $response ) !== 'OK' ? Either::left( $response ) : Either::right( $response );

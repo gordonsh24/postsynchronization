@@ -9,6 +9,7 @@ use WPML\FP\Maybe;
 class Mapper {
 
 	const POST_IDS_MAP = 'post-synchronization-post-ids-map';
+	const MEDIA_IDS_MAP = 'post-synchronization-image-ids-map';
 
 	/**
 	 * @param int $sourcePostId
@@ -16,25 +17,48 @@ class Mapper {
 	 * @param int $targetPostId
 	 */
 	public static function savePostIdsMapping( int $sourcePostId, string $siteName, int $targetPostId ) {
-		$map                  = get_option( self::POST_IDS_MAP, [] );
-		$map[ $sourcePostId ][$siteName] = $targetPostId;
-		update_option( self::POST_IDS_MAP, $map );
+		self::saveItemIdsMapping( self::POST_IDS_MAP, $sourcePostId, $siteName, $targetPostId );
 	}
 
 
 	public static function getTargetPostId( int $sourcePostId, string $siteName ): Maybe {
-		$map = get_option( self::POST_IDS_MAP, [] );
-
-		return Maybe::fromNullable( $map[ $sourcePostId ][ $siteName ] ?? null );
+		return self::getItemId( self::POST_IDS_MAP, $sourcePostId, $siteName );
 	}
 
-	public static function postData( \WP_Post $post, SiteData $site ): array {
+	/**
+	 * @param int $sourceMediaId
+	 * @param string $siteName
+	 * @param int $targetMediaId
+	 */
+	public static function saveMediaIdsMapping( int $sourceMediaId, string $siteName, int $targetMediaId ) {
+		self::saveItemIdsMapping( self::MEDIA_IDS_MAP, $sourceMediaId, $siteName, $targetMediaId );
+	}
+
+
+	public static function getMediaId( int $sourceMediaId, string $siteName ): Maybe {
+		return self::getItemId( self::MEDIA_IDS_MAP, $sourceMediaId, $siteName );
+	}
+
+	private static function saveItemIdsMapping( string $optionName, int $sourceId, string $siteName, int $targetId ) {
+		$map                           = get_option( $optionName, [] );
+		$map[ $sourceId ][ $siteName ] = $targetId;
+		update_option( $optionName, $map );
+	}
+
+	private static function getItemId( string $optionName, int $sourceId, string $siteName ): Maybe {
+		$map = get_option( $optionName, [] );
+
+		return Maybe::fromNullable( $map[ $sourceId ][ $siteName ] ?? null );
+	}
+
+	public static function postData( \WP_Post $post, SiteData $site, $featuredImageId = null ): array {
 		return [
-			'title'      => $post->post_title,
-			'status'     => $post->post_status,
-			'content'    => $post->post_content,
-			'categories' => self::mapCategories( $post, $site ),
-			'excerpt'    => $post->post_excerpt,
+			'title'          => $post->post_title,
+			'status'         => $post->post_status,
+			'content'        => $post->post_content,
+			'categories'     => self::mapCategories( $post, $site ),
+			'excerpt'        => $post->post_excerpt,
+			'featured_media' => $featuredImageId,
 		];
 	}
 
