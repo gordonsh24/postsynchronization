@@ -26,8 +26,8 @@ class OnPostSave {
 					/** @var \WPML\FP\Either $result */
 					$result = $action( $post );
 
-					return $result->getOrElse( Fns::tap( function ( $error ) {
-						error_log( $error );
+					return $result->getOrElse( Fns::tap( function ( $error ) use ( $post ) {
+						update_post_meta( $post->ID, 'post-sync-error', $error );
 					} ) );
 				} );
 		};
