@@ -46,7 +46,7 @@ class Actions {
 			] );
 
 			$saveInMap = function ( $body ) use ( $post, $siteData ) {
-				Mapper::savePostIdsMapping( $post->ID, [ $siteData->name => $body->id ] );
+				Mapper::savePostIdsMapping( $post->ID, $siteData->name, $body->id );
 
 				return $body;
 			};

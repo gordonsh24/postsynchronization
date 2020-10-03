@@ -10,34 +10,39 @@ use WPML\FP\Relation;
 
 class OnPostSave {
 
-	public static function onPostSave( callable $createAction, callable $updateAction, callable $deleteAction, callable $getSiteConfiguration, callable $getTargetPostId ) {
-		return function ( $postId, \WP_Post $post ) use ( $createAction, $updateAction, $deleteAction, $getSiteConfiguration, $getTargetPostId ) {
-			if ( Lst::includes( $post->post_status, [ 'auto-draft', 'revision' ] ) ) {
+	public static function onPostSave() {
+		return function ( $postId, \WP_Post $post ) {
+			if ( empty( $_POST )  || Lst::includes( $post->post_status, [ 'auto-draft', 'revision' ] ) ) {
 				return null;
 			}
 
-			$getAction = self::getAction( $createAction, $updateAction, $deleteAction, $getSiteConfiguration, $getTargetPostId );
-			$action    = $getAction( $post );
+			\wpml_collect( PostSynchronizationSettings::getSites( $postId ) )
+				->map( [ SitesConfiguration::class, 'getByName' ] )
+				->filter()
+				->map( function ( $siteData ) use ( $post ) {
+					$getAction = self::getAction();
+					$action    = $getAction( $post, $siteData );
 
-			/** @var \WPML\FP\Either $result */
-			$result = $action( $post );
+					/** @var \WPML\FP\Either $result */
+					$result = $action( $post );
 
-			return $result->getOrElse( Fns::tap( function ( $error ) {
-				error_log( $error );
-			} ) );
+					return $result->getOrElse( Fns::tap( function ( $error ) {
+						error_log( $error );
+					} ) );
+				} );
 		};
 	}
 
-	private static function getAction( callable $createAction, callable $updateAction, callable $deleteAction, callable $getSiteConfiguration, callable $getTargetPostId ): callable {
-		return function ( \WP_Post $post ) use ( $createAction, $updateAction, $deleteAction, $getSiteConfiguration, $getTargetPostId ) {
-			$siteData = current( $getSiteConfiguration() );
-
+	private static function getAction(): callable {
+		return function ( \WP_Post $post, $siteData ) {
 			$deleteOrUpdate = Logic::cond( [
-				[ Fns::always( Relation::equals( 'trash', $post->post_status ) ), $deleteAction( $siteData ) ],
-				[ Fns::always( true ), $updateAction( $siteData ) ],
+				[ Fns::always( Relation::equals( 'trash', $post->post_status ) ), Actions::delete( $siteData ) ],
+				[ Fns::always( true ), Actions::update( $siteData ) ],
 			] );
 
-			return $getTargetPostId( $post->ID, $siteData->name )->map( $deleteOrUpdate )->getOrElse( Fns::always( $createAction( $siteData ) ) );
+			return Mapper::getTargetPostId( $post->ID, $siteData->name )
+			             ->map( $deleteOrUpdate )
+			             ->getOrElse( Fns::always( Actions::create( $siteData ) ) );
 		};
 	}
 

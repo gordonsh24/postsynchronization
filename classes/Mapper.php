@@ -12,11 +12,12 @@ class Mapper {
 
 	/**
 	 * @param int $sourcePostId
-	 * @param array $targetPostIds [siteName -> ids]
+	 * @param string $siteName
+	 * @param int $targetPostId
 	 */
-	public static function savePostIdsMapping( int $sourcePostId, array $targetPostIds ) {
+	public static function savePostIdsMapping( int $sourcePostId, string $siteName, int $targetPostId ) {
 		$map                  = get_option( self::POST_IDS_MAP, [] );
-		$map[ $sourcePostId ] = $targetPostIds;
+		$map[ $sourcePostId ][$siteName] = $targetPostId;
 		update_option( self::POST_IDS_MAP, $map );
 	}
 

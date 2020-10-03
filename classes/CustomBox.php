@@ -7,12 +7,6 @@ use WPML\FP\Obj;
 
 class CustomBox {
 
-
-	public static function addHooks() {
-		add_action( 'add_meta_boxes', [ self::class, 'display' ] );
-		add_action( 'save_post', [ self::class, 'save' ], 1, 1 );
-	}
-
 	public static function display() {
 		$render = function ( $post ) {
 			?>

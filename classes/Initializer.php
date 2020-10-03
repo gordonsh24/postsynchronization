@@ -7,15 +7,10 @@ namespace PostSynchronization;
 class Initializer {
 
 	public static function addHooks() {
-		$onPostSave = OnPostSave::onPostSave(
-			Actions::create(),
-			Actions::update(),
-			Actions::delete(),
-			[ SitesConfiguration::class, 'get' ],
-			[ Mapper::class, 'getTargetPostId' ],
-		);
+		add_action( 'add_meta_boxes', [ CustomBox::class, 'display' ] );
+		add_action( 'save_post', [ CustomBox::class, 'save' ], 9, 1 );
 
-		add_action( 'save_post', $onPostSave, 10, 2 );
+		add_action( 'save_post', OnPostSave::onPostSave(), 10, 2 );
 	}
 
 }
