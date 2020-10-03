@@ -13,3 +13,4 @@ Text Domain: postsynchronization
 require_once 'vendor/autoload.php';
 
 \PostSynchronization\Initializer::addHooks();
+\PostSynchronization\CustomBox::addHooks();
