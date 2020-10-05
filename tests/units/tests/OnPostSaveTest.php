@@ -35,6 +35,10 @@ class OnPostSaveTest extends \WP_Mock\Tools\TestCase {
 					2 => 4,
 					3 => 2,
 				],
+				'authorsMap'    => [
+					1 => 11,
+					2 => 12,
+				],
 			],
 			[
 				'name'          => 'develop',
@@ -64,47 +68,6 @@ class OnPostSaveTest extends \WP_Mock\Tools\TestCase {
 	 */
 	public function it_creates_target_post() {
 		$post = $this->createSamplePost();
-
-		$_POST = [ 'some' => 'data' ];
-
-		update_post_meta( $post->ID, PostSynchronizationSettings::OPTION_NAME, [ 'gdzienazabieg' ] );
-
-		$this->expectRemotePost(
-			'http://gdzienazabieg.test//wp-json/wp/v2/posts',
-			[
-				'Authorization' => 'Basic ' . base64_encode( 'admin:password' )
-			],
-			[
-				'title'          => $post->post_title,
-				'status'         => $post->post_status,
-				'content'        => $post->post_content,
-				'categories'     => '1',
-				'excerpt'        => $post->post_excerpt,
-				'featured_media' => 0,
-			],
-			[
-				'response' => [
-					'status'  => 'OK',
-					'message' => 'Created',
-				],
-				'body'     => json_encode( [
-					'id' => $post->ID + 100,
-				] ),
-			]
-		);
-
-		$handler = OnPostSave::onPostSave();
-		$handler( $post->ID, $post );
-
-		$expectedMap = [ $post->ID => [ 'gdzienazabieg' => $post->ID + 100 ] ];
-		$this->assertEquals( $expectedMap, get_option( Mapper::POST_IDS_MAP ) );
-	}
-
-	/**
-	 * @test
-	 */
-	public function it_maps_categories() {
-		$post = $this->createSamplePost();
 		$this->setPostCategories( $post->ID, [ 5, 2, 3 ] );
 
 		$_POST = [ 'some' => 'data' ];
@@ -121,6 +84,7 @@ class OnPostSaveTest extends \WP_Mock\Tools\TestCase {
 				'status'         => $post->post_status,
 				'content'        => $post->post_content,
 				'categories'     => '1,4,2',
+				'author'         => 12,
 				'excerpt'        => $post->post_excerpt,
 				'featured_media' => 0,
 			],
@@ -145,6 +109,7 @@ class OnPostSaveTest extends \WP_Mock\Tools\TestCase {
 	private function createSamplePost() {
 		$post               = $this->getMockBuilder( '\WP_Post' )->getMock();
 		$post->ID           = 10;
+		$post->post_author  = 2;
 		$post->post_title   = 'My post';
 		$post->post_status  = 'publish';
 		$post->post_type    = 'post';

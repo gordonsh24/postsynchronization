@@ -19,6 +19,9 @@ class SiteData {
 	/** @var array */
 	public $categoriesMap = [];
 
+	/** @var array */
+	public $authorsMap = [];
+
 	public static function create( array $data ): SiteData {
 		$result = new self();
 
@@ -26,7 +29,8 @@ class SiteData {
 		$result->url           = $data['url'] ?? null;
 		$result->user          = $data['user'] ?? null;
 		$result->password      = $data['password'] ?? null;
-		$result->categoriesMap = $data['categoriesMap'] ?? null;
+		$result->categoriesMap = $data['categoriesMap'] ?? [];
+		$result->authorsMap    = $data['authorsMap'] ?? [];
 
 		return $result;
 	}

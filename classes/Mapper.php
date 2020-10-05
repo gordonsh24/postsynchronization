@@ -5,6 +5,7 @@ namespace PostSynchronization;
 
 
 use WPML\FP\Maybe;
+use WPML\FP\Obj;
 
 class Mapper {
 
@@ -57,6 +58,7 @@ class Mapper {
 			'status'         => $post->post_status,
 			'content'        => $post->post_content,
 			'categories'     => self::mapCategories( $post, $site ),
+			'author'         => self::mapAuthor( $post, $site ),
 			'excerpt'        => $post->post_excerpt,
 			'featured_media' => $featuredImageId,
 		];
@@ -76,5 +78,9 @@ class Mapper {
 			->map( $map )
 			->unique()
 			->implode( ',' );
+	}
+
+	private static function mapAuthor( \WP_Post $post, SiteData $site ): int {
+		return Obj::propOr( 1, $post->post_author, $site->authorsMap );
 	}
 }
