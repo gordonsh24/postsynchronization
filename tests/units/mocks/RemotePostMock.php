@@ -20,10 +20,10 @@ trait RemotePostMock {
 
 	}
 
-	public function defineAnyRemotePost(  ) {
+	public function defineAnyRemotePost() {
 		\WP_Mock::userFunction( 'wp_remote_post' );
 	}
-	
+
 
 	public function expectRemotePost( string $url, array $headers, array $body, array $response ) {
 		\WP_Mock::userFunction( 'wp_remote_post', [
@@ -31,8 +31,8 @@ trait RemotePostMock {
 			'times'  => 1,
 			'return' => function ( $actualUrls, $params ) use ( $url, $headers, $body, $response ) {
 				$this->assertEquals( $url, $actualUrls );
-				$this->assertEquals( $params['headers'], $headers );
-				$this->assertEquals( $params['body'], $body );
+				$this->assertEquals( $headers, $params['headers'] );
+				$this->assertEquals( $body, $params['body'] );
 
 				return $response;
 			},

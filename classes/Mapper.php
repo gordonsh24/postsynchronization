@@ -58,6 +58,7 @@ class Mapper {
 			'status'         => $post->post_status,
 			'content'        => $post->post_content,
 			'categories'     => self::mapCategories( $post, $site ),
+			'tags'           => self::mapTags( $post, $site ),
 			'author'         => self::mapAuthor( $post, $site ),
 			'excerpt'        => $post->post_excerpt,
 			'featured_media' => $featuredImageId,
@@ -76,6 +77,20 @@ class Mapper {
 
 		return \wpml_collect( $categories )
 			->map( $map )
+			->unique()
+			->implode( ',' );
+	}
+
+	private static function mapTags( \WP_Post $post, SiteData $siteData ): string {
+		$tagIds = wp_get_post_tags( $post->ID, [ 'fields' => 'ids' ] );
+
+		$map = function ( $id ) use ( $siteData ) {
+			return \wpml_collect( $siteData->tagsMap )->get( $id, false );
+		};
+
+		return \wpml_collect( $tagIds )
+			->map( $map )
+			->filter()
 			->unique()
 			->implode( ',' );
 	}

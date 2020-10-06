@@ -2,7 +2,7 @@
 
 namespace PostSynchronization;
 
-use PostSynchronization\Mocks\CategoriesMock;
+use PostSynchronization\Mocks\TaxonomiesMock;
 use PostSynchronization\Mocks\MediaMock;
 use PostSynchronization\Mocks\RemotePostMock;
 use WPML\LIB\WP\OptionMock;
@@ -13,7 +13,7 @@ class OnPostSaveTest extends \WP_Mock\Tools\TestCase {
 	use OptionMock;
 	use RemotePostMock;
 	use MediaMock;
-	use CategoriesMock;
+	use TaxonomiesMock;
 
 	public function setUp(): void {
 		parent::setUp();
@@ -34,6 +34,11 @@ class OnPostSaveTest extends \WP_Mock\Tools\TestCase {
 				'categoriesMap' => [
 					2 => 4,
 					3 => 2,
+				],
+				'tagsMap'       => [
+					6  => 26,
+					8  => 28,
+					11 => 31,
 				],
 				'authorsMap'    => [
 					1 => 11,
@@ -69,6 +74,7 @@ class OnPostSaveTest extends \WP_Mock\Tools\TestCase {
 	public function it_creates_target_post() {
 		$post = $this->createSamplePost();
 		$this->setPostCategories( $post->ID, [ 5, 2, 3 ] );
+		$this->setPostTags( $post->ID, [ 2, 8, 11 ] );
 
 		$_POST = [ 'some' => 'data' ];
 
@@ -84,6 +90,7 @@ class OnPostSaveTest extends \WP_Mock\Tools\TestCase {
 				'status'         => $post->post_status,
 				'content'        => $post->post_content,
 				'categories'     => '1,4,2',
+				'tags'           => '28,31',
 				'author'         => 12,
 				'excerpt'        => $post->post_excerpt,
 				'featured_media' => 0,

@@ -20,6 +20,9 @@ class SiteData {
 	public $categoriesMap = [];
 
 	/** @var array */
+	public $tagsMap = [];
+
+	/** @var array */
 	public $authorsMap = [];
 
 	public static function create( array $data ): SiteData {
@@ -30,6 +33,7 @@ class SiteData {
 		$result->user          = $data['user'] ?? null;
 		$result->password      = $data['password'] ?? null;
 		$result->categoriesMap = $data['categoriesMap'] ?? [];
+		$result->tagsMap       = $data['tagsMap'] ?? [];
 		$result->authorsMap    = $data['authorsMap'] ?? [];
 
 		return $result;

@@ -16,7 +16,7 @@ require_once WP_PLUGIN_DIR . '/vendor/wpml/wp/tests/mocks/PostMock.php';
 
 require_once './mocks/RemotePostMock.php';
 require_once './mocks/MediaMock.php';
-require_once './mocks/CategoriesMock.php';
+require_once './mocks/TaxonomiesMock.php';
 
 FunctionMocker::init(
 	[
