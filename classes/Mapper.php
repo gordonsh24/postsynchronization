@@ -62,6 +62,15 @@ class Mapper {
 		return Maybe::fromNullable( $row );
 	}
 
+	public static function getItems( string $postType, int $sourceId ): Maybe {
+		global $wpdb;
+
+		$sql    = "SELECT * FROM {$wpdb->prefix}wp_ps_mapping WHERE `type` = %s AND source_id = %d";
+		$result = $wpdb->get_results( $wpdb->prepare( $sql, $postType, $sourceId ) );
+
+		return Maybe::fromNullable( count( $result ) ? $result : null );
+	}
+
 	public static function postData( \WP_Post $post, SiteData $site, $featuredImageId = null ): array {
 		return [
 			'title'          => $post->post_title,

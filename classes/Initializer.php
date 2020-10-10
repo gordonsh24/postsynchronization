@@ -11,6 +11,8 @@ class Initializer {
 		add_action( 'save_post', [ CustomBox::class, 'save' ], 9, 1 );
 
 		add_action( 'save_post', OnPostSave::onPostSave(), 10, 2 );
+
+		Redirections::addHooks();
 	}
 
 }
