@@ -4,6 +4,7 @@
 namespace PostSynchronization\Migrations;
 
 
+use PostSynchronization\Mapper;
 use PostSynchronization\SitesConfiguration;
 use WPML\FP\Lst;
 use WPML\FP\Obj;
@@ -46,7 +47,7 @@ class OptionToTable {
 			foreach ( $targetSites as $siteName => $targetId ) {
 				$targetUrl = self::getTargetUrl( $siteName, $targetId );
 
-				self::insertPostMapping( $sourceId, $postType, $siteName, $targetId, $targetUrl );
+				Mapper::saveItemIdsMapping( $postType, $sourceId, $siteName, $targetId, $targetUrl );
 
 				call_user_func( $observer, sprintf( 'Inserted %d %s %s %d', $sourceId, $postType, $siteName, $targetId ) );
 			}
@@ -72,25 +73,10 @@ class OptionToTable {
 
 		foreach ( $mapping as $sourceId => $targetSites ) {
 			foreach ( $targetSites as $siteName => $targetId ) {
-				self::insertPostMapping( $sourceId, 'media', $siteName, $targetId );
+				Mapper::saveItemIdsMapping( 'media', $sourceId, $siteName, $targetId, '' );
 
 				call_user_func( $observer, sprintf( 'Inserted %d %s %s %d', $sourceId, 'media', $siteName, $targetId ) );
 			}
 		}
-	}
-
-	private static function insertPostMapping( int $sourceId, string $postType, string $siteName, int $targetId, string $targetUrl = '' ) {
-		global $wpdb;
-
-		$wpdb->insert(
-			$wpdb->prefix . 'wp_ps_mapping',
-			[
-				'source_id'  => $sourceId,
-				'type'       => $postType,
-				'site_name'  => $siteName,
-				'target_id'  => $targetId,
-				'target_url' => $targetUrl,
-			]
-		);
 	}
 }

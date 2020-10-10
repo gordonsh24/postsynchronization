@@ -9,21 +9,17 @@ use WPML\FP\Obj;
 
 class Mapper {
 
-	const POST_IDS_MAP = 'post-synchronization-post-ids-map';
-	const MEDIA_IDS_MAP = 'post-synchronization-image-ids-map';
+	public static function savePostIdsMapping( int $sourcePostId, string $siteName, int $targetPostId, string $targetUrl ) {
+		$postType = get_post_type( $sourcePostId );
 
-	/**
-	 * @param int $sourcePostId
-	 * @param string $siteName
-	 * @param int $targetPostId
-	 */
-	public static function savePostIdsMapping( int $sourcePostId, string $siteName, int $targetPostId ) {
-		self::saveItemIdsMapping( self::POST_IDS_MAP, $sourcePostId, $siteName, $targetPostId );
+		self::saveItemIdsMapping( $postType, $sourcePostId, $siteName, $targetPostId, $targetUrl );
 	}
 
 
 	public static function getTargetPostId( int $sourcePostId, string $siteName ): Maybe {
-		return self::getItemId( self::POST_IDS_MAP, $sourcePostId, $siteName );
+		$postType = get_post_type( $sourcePostId );
+
+		return self::getItem( $postType, $sourcePostId, $siteName )->map( Obj::prop( 'target_id' ) );
 	}
 
 	/**
@@ -32,24 +28,38 @@ class Mapper {
 	 * @param int $targetMediaId
 	 */
 	public static function saveMediaIdsMapping( int $sourceMediaId, string $siteName, int $targetMediaId ) {
-		self::saveItemIdsMapping( self::MEDIA_IDS_MAP, $sourceMediaId, $siteName, $targetMediaId );
+		self::saveItemIdsMapping( 'media', $sourceMediaId, $siteName, $targetMediaId );
 	}
 
 
 	public static function getMediaId( int $sourceMediaId, string $siteName ): Maybe {
-		return self::getItemId( self::MEDIA_IDS_MAP, $sourceMediaId, $siteName );
+		return self::getItem( 'media', $sourceMediaId, $siteName )->map( Obj::prop( 'target_id' ) );
 	}
 
-	private static function saveItemIdsMapping( string $optionName, int $sourceId, string $siteName, int $targetId ) {
-		$map                           = get_option( $optionName, [] );
-		$map[ $sourceId ][ $siteName ] = $targetId;
-		update_option( $optionName, $map );
+	public static function saveItemIdsMapping( string $postType, int $sourceId, string $siteName, int $targetId, string $targetUrl = '' ) {
+		if ( self::getItem( $postType, $sourceId, $siteName )->isNothing() ) {
+			global $wpdb;
+
+			$wpdb->insert(
+				$wpdb->prefix . 'wp_ps_mapping',
+				[
+					'source_id'  => $sourceId,
+					'type'       => $postType,
+					'site_name'  => $siteName,
+					'target_id'  => $targetId,
+					'target_url' => $targetUrl,
+				]
+			);
+		}
 	}
 
-	private static function getItemId( string $optionName, int $sourceId, string $siteName ): Maybe {
-		$map = get_option( $optionName, [] );
+	public static function getItem( string $postType, int $sourceId, string $siteName ): Maybe {
+		global $wpdb;
 
-		return Maybe::fromNullable( $map[ $sourceId ][ $siteName ] ?? null );
+		$sql = "SELECT * FROM {$wpdb->prefix}wp_ps_mapping WHERE `type` = %s AND source_id = %d AND site_name = %s";
+		$row = $wpdb->get_row( $wpdb->prepare( $sql, $postType, $sourceId, $siteName ) );
+
+		return Maybe::fromNullable( $row );
 	}
 
 	public static function postData( \WP_Post $post, SiteData $site, $featuredImageId = null ): array {
