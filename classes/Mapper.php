@@ -4,6 +4,7 @@
 namespace PostSynchronization;
 
 
+use WPML\FP\Lst;
 use WPML\FP\Maybe;
 use WPML\FP\Obj;
 
@@ -69,6 +70,14 @@ class Mapper {
 		$result = $wpdb->get_results( $wpdb->prepare( $sql, $postType, $sourceId ) );
 
 		return Maybe::fromNullable( count( $result ) ? $result : null );
+	}
+
+	public static function getTargetUrl( \WP_Post $post ): Maybe {
+		$postType = get_post_type( $post->ID );
+
+		return Mapper::getItems( $postType, $post->ID )
+		             ->map( Lst::nth( 0 ) )
+		             ->map( Obj::prop( 'target_url' ) );
 	}
 
 	public static function postData( \WP_Post $post, SiteData $site, $featuredImageId = null ): array {
