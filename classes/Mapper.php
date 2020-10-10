@@ -72,12 +72,21 @@ class Mapper {
 		return Maybe::fromNullable( count( $result ) ? $result : null );
 	}
 
-	public static function getTargetUrl( \WP_Post $post ): Maybe {
-		$postType = get_post_type( $post->ID );
+	/**
+	 * @param \WP_Post $post
+	 *
+	 * @return Maybe
+	 */
+	public static function getTargetUrl( \WP_Post $post ) {
+		$fn = function () use ( $post ) {
+			$postType = get_post_type( $post->ID );
 
-		return Mapper::getItems( $postType, $post->ID )
-		             ->map( Lst::nth( 0 ) )
-		             ->map( Obj::prop( 'target_url' ) );
+			return Mapper::getItems( $postType, $post->ID )
+			             ->map( Lst::nth( 0 ) )
+			             ->map( Obj::prop( 'target_url' ) );
+		};
+
+		return Cache::get( 'target-url-for' . $post->ID, $fn );
 	}
 
 	public static function postData( \WP_Post $post, SiteData $site, $featuredImageId = null ): array {
