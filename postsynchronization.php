@@ -13,3 +13,7 @@ Text Domain: postsynchronization
 require_once 'vendor/autoload.php';
 
 \PostSynchronization\Initializer::addHooks();
+
+if ( defined( 'WP_CLI' ) ) {
+	\PostSynchronization\Migrations\Migrations::defineCommand();
+}
