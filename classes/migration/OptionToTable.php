@@ -5,9 +5,7 @@ namespace PostSynchronization\Migrations;
 
 
 use PostSynchronization\Mapper;
-use PostSynchronization\SitesConfiguration;
-use WPML\FP\Lst;
-use WPML\FP\Obj;
+use PostSynchronization\TargetPostInfo;
 
 class OptionToTable {
 
@@ -45,7 +43,7 @@ class OptionToTable {
 			$postType = get_post_type( $sourceId );
 
 			foreach ( $targetSites as $siteName => $targetId ) {
-				$targetUrl = self::getTargetUrl( $siteName, $targetId );
+				$targetUrl = TargetPostInfo::getTargetUrl( $siteName, $targetId );
 
 				Mapper::saveItemIdsMapping( $postType, $sourceId, $siteName, $targetId, $targetUrl );
 
@@ -54,19 +52,6 @@ class OptionToTable {
 		}
 	}
 
-	private static function getTargetUrl( string $siteName, int $targetId ): string {
-		$url = SitesConfiguration::getByName( $siteName )->url;
-		$url .= '/wp-json/wp/v2/posts?_fields=link&include[]=' . $targetId;
-
-		$response = wp_remote_post( $url, [ 'method' => 'GET' ] );
-		if ( wp_remote_retrieve_response_message( $response ) === 'OK' ) {
-			$response = json_decode( Obj::prop( 'body', $response ) );
-
-			return Obj::pathOr( '', [ 0, 'link' ], $response );
-		}
-
-		return '';
-	}
 
 	private static function migrateMedia( $observer ) {
 		$mapping = get_option( 'post-synchronization-image-ids-map' );
