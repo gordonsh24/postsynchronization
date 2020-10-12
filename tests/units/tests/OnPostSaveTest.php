@@ -2,6 +2,7 @@
 
 namespace PostSynchronization;
 
+use PostSynchronization\Mocks\MapperMock;
 use PostSynchronization\Mocks\TaxonomiesMock;
 use PostSynchronization\Mocks\MediaMock;
 use PostSynchronization\Mocks\RemotePostMock;
@@ -14,6 +15,7 @@ class OnPostSaveTest extends \WP_Mock\Tools\TestCase {
 	use RemotePostMock;
 	use MediaMock;
 	use TaxonomiesMock;
+	use MapperMock;
 
 	public function setUp(): void {
 		parent::setUp();
@@ -24,6 +26,7 @@ class OnPostSaveTest extends \WP_Mock\Tools\TestCase {
 		$this->setUpRemotePostMock();
 		$this->setUpMediaMock();
 		$this->setUpCategories();
+		$this->setUpMapperMock();
 
 		! defined( 'POST_SYNC_SITES' ) && define( 'POST_SYNC_SITES', [
 			[
@@ -74,6 +77,7 @@ class OnPostSaveTest extends \WP_Mock\Tools\TestCase {
 	public function it_creates_target_post() {
 		$post = $this->createSamplePost();
 		$this->setPostCategories( $post->ID, [ 5, 2, 3 ] );
+		$this->mockPostType( $post->ID, 'post' );
 		$this->setPostTags( $post->ID, [ 2, 8, 11 ] );
 
 		$_POST = [ 'some' => 'data' ];
@@ -101,16 +105,27 @@ class OnPostSaveTest extends \WP_Mock\Tools\TestCase {
 					'message' => 'Created',
 				],
 				'body'     => json_encode( [
-					'id' => $post->ID + 100,
+					'id'   => $post->ID + 100,
+					'link' => 'http://gdzieniazabieg.test/external_post',
 				] ),
 			]
 		);
 
+
 		$handler = OnPostSave::onPostSave();
 		$handler( $post->ID, $post );
 
-		$expectedMap = [ $post->ID => [ 'gdzienazabieg' => $post->ID + 100 ] ];
-		$this->assertEquals( $expectedMap, get_option( Mapper::POST_IDS_MAP ) );
+		$expectedMap = [
+			[
+				'id'         => 1,
+				'source_id'  => $post->ID,
+				'type'       => 'post',
+				'site_name'  => 'gdzienazabieg',
+				'target_id'  => $post->ID + 100,
+				'target_url' => 'http://gdzieniazabieg.test/external_post',
+			]
+		];
+		$this->assertEquals( $expectedMap, $this->getAllMapping() );
 	}
 
 	private function createSamplePost() {

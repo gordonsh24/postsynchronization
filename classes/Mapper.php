@@ -12,7 +12,7 @@ use WPML\FP\Obj;
 class Mapper {
 
 	public static function savePostIdsMapping( int $sourcePostId, string $siteName, int $targetPostId, string $targetUrl ) {
-		$postType = get_post_type( $sourcePostId );
+		$postType = \get_post_type( $sourcePostId );
 		self::saveItemIdsMapping( $postType, $sourcePostId, $siteName, $targetPostId, $targetUrl );
 
 		do_action( 'postsync-post-id-mapping-saved', $sourcePostId, $siteName, $targetPostId, $targetUrl );
