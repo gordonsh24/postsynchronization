@@ -4,6 +4,7 @@
 namespace PostSynchronization;
 
 
+use PostSynchronization\Cache\CacheIntegrator;
 use WPML\FP\Lst;
 use WPML\FP\Maybe;
 use WPML\FP\Obj;
@@ -12,8 +13,9 @@ class Mapper {
 
 	public static function savePostIdsMapping( int $sourcePostId, string $siteName, int $targetPostId, string $targetUrl ) {
 		$postType = get_post_type( $sourcePostId );
-
 		self::saveItemIdsMapping( $postType, $sourcePostId, $siteName, $targetPostId, $targetUrl );
+
+		do_action( 'postsync-post-id-mapping-saved', $sourcePostId, $siteName, $targetPostId, $targetUrl );
 	}
 
 
@@ -79,6 +81,10 @@ class Mapper {
 	 */
 	public static function getTargetUrl( \WP_Post $post ) {
 		$fn = function () use ( $post ) {
+			if ( ! PostSynchronizationSettings::hasAnyActiveSynchronization( $post->ID ) ) {
+				return Maybe::nothing();
+			}
+
 			$postType = get_post_type( $post->ID );
 
 			return Mapper::getItems( $postType, $post->ID )
@@ -86,7 +92,7 @@ class Mapper {
 			             ->map( Obj::prop( 'target_url' ) );
 		};
 
-		return Cache::get( 'target-url-for' . $post->ID, $fn );
+		return CacheIntegrator::targetUrl( $post->ID, $fn );
 	}
 
 	public static function postData( \WP_Post $post, SiteData $site, $featuredImageId = null ): array {
