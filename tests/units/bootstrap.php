@@ -18,6 +18,7 @@ require_once './mocks/RemotePostMock.php';
 require_once './mocks/MediaMock.php';
 require_once './mocks/TaxonomiesMock.php';
 require_once './mocks/MapperMock.php';
+require_once './mocks/TransientMock.php';
 
 FunctionMocker::init(
 	[

@@ -39,5 +39,18 @@ trait RemotePostMock {
 		] );
 	}
 
+	public function expectDeleteRemotePost( string $url, array $headers, array $response ) {
+		\WP_Mock::userFunction( 'wp_remote_post', [
+			'args'   => [ $url, [ 'headers' => $headers, 'method' => 'DELETE' ] ],
+			'times'  => 1,
+			'return' => function ( $actualUrls, $params ) use ( $url, $headers, $response ) {
+				$this->assertEquals( $url, $actualUrls );
+				$this->assertEquals( $headers, $params['headers'] );
+
+				return $response;
+			},
+		] );
+	}
+
 
 }
