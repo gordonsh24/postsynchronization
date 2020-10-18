@@ -177,7 +177,7 @@ class OnPostSaveTest extends \WP_Mock\Tools\TestCase {
 			[
 				'response' => [
 					'status'  => 'OK',
-					'message' => 'Created',
+					'message' => 'OK',
 				],
 				'body'     => json_encode( [
 					'id'   => $post->ID + 100,
@@ -211,7 +211,7 @@ class OnPostSaveTest extends \WP_Mock\Tools\TestCase {
 			[
 				'response' => [
 					'status'  => 'OK',
-					'message' => 'Created',
+					'message' => 'OK',
 				],
 			]
 		);

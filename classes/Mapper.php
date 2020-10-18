@@ -5,11 +5,31 @@ namespace PostSynchronization;
 
 
 use PostSynchronization\Cache\CacheIntegrator;
+use WPML\FP\Curryable;
 use WPML\FP\Lst;
 use WPML\FP\Maybe;
 use WPML\FP\Obj;
 
+/**
+ * Class Mapper
+ * @package PostSynchronization
+ *
+ * @method static callable|Maybe getMediaId(...$sourceMediaId, ...$siteName): Curried :: int->string->Maybe
+ *
+ * @method static callable|void saveMediaIdsMapping(...$sourceMediaId, ...$siteName, ...$targetMediaId): Curried :: int->string->int->void
+ */
 class Mapper {
+	use Curryable;
+
+	public static function init() {
+		self::curryN( 'getMediaId', 2, function ( int $sourceMediaId, string $siteName ): Maybe {
+			return self::getItem( 'media', $sourceMediaId, $siteName )->map( Obj::prop( 'target_id' ) );
+		} );
+
+		self::curryN( 'saveMediaIdsMapping', 3, function ( int $sourceMediaId, string $siteName, int $targetMediaId ) {
+			self::saveItemIdsMapping( 'media', $sourceMediaId, $siteName, $targetMediaId );
+		} );
+	}
 
 	public static function savePostIdsMapping( int $sourcePostId, string $siteName, int $targetPostId, string $targetUrl ) {
 		$postType = \get_post_type( $sourcePostId );
@@ -23,20 +43,6 @@ class Mapper {
 		$postType = get_post_type( $sourcePostId );
 
 		return self::getItem( $postType, $sourcePostId, $siteName )->map( Obj::prop( 'target_id' ) );
-	}
-
-	/**
-	 * @param int $sourceMediaId
-	 * @param string $siteName
-	 * @param int $targetMediaId
-	 */
-	public static function saveMediaIdsMapping( int $sourceMediaId, string $siteName, int $targetMediaId ) {
-		self::saveItemIdsMapping( 'media', $sourceMediaId, $siteName, $targetMediaId );
-	}
-
-
-	public static function getMediaId( int $sourceMediaId, string $siteName ): Maybe {
-		return self::getItem( 'media', $sourceMediaId, $siteName )->map( Obj::prop( 'target_id' ) );
 	}
 
 	public static function saveItemIdsMapping( string $postType, int $sourceId, string $siteName, int $targetId, string $targetUrl = '' ) {
@@ -142,3 +148,5 @@ class Mapper {
 		return Obj::propOr( 1, $post->post_author, $site->authorsMap );
 	}
 }
+
+Mapper::init();

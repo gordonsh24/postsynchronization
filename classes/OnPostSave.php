@@ -20,30 +20,23 @@ class OnPostSave {
 				->map( [ SitesConfiguration::class, 'getByName' ] )
 				->filter()
 				->map( function ( $siteData ) use ( $post ) {
-					$getAction = self::getAction();
-					$action    = $getAction( $post, $siteData );
-
+					$action = self::getAction( $post, $siteData );
 					/** @var \WPML\FP\Either $result */
-					$result = $action( $post );
-
-					return $result->getOrElse( Fns::tap( function ( $error ) use ( $post ) {
-						update_post_meta( $post->ID, 'post-sync-error', $error );
-					} ) );
+					$action( $post )->bimap( Logger::logSyncError( $post ), Fns::identity() );
 				} );
 		};
 	}
 
-	private static function getAction(): callable {
-		return function ( \WP_Post $post, $siteData ) {
-			$deleteOrUpdate = Logic::cond( [
-				[ Fns::always( Relation::equals( 'trash', $post->post_status ) ), Actions::delete( $siteData ) ],
-				[ Fns::always( true ), Actions::update( $siteData ) ],
-			] );
+	private static function getAction( \WP_Post $post, $siteData ): callable {
+		$deleteOrUpdate = Logic::cond( [
+			[ Fns::always( Relation::equals( 'trash', $post->post_status ) ), Actions::delete( $siteData ) ],
+			[ Fns::always( true ), Actions::update( $siteData ) ],
+		] );
 
-			return Mapper::getTargetPostId( $post->ID, $siteData->name )
-			             ->map( $deleteOrUpdate )
-			             ->getOrElse( Fns::always( Actions::create( $siteData ) ) );
-		};
+		return Mapper::getTargetPostId( $post->ID, $siteData->name )
+		             ->map( $deleteOrUpdate )
+		             ->getOrElse( Fns::always( Actions::create( $siteData ) ) );
+
 	}
 
 }

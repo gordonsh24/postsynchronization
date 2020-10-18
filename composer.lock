@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "00e03c2f75d13273bee2b551a41415fc",
+    "content-hash": "1783815587acce0b4281024f19a4c2b2",
     "packages": [
         {
             "name": "wpml/collect",
@@ -55,11 +55,11 @@
         },
         {
             "name": "wpml/fp",
-            "version": "dev-develop",
+            "version": "dev-eithr-improvements",
             "source": {
                 "type": "git",
                 "url": "https://git.onthegosystems.com/wpml-packages/fp.git",
-                "reference": "533e380e01fc16163398adfd92c4fea2359be251"
+                "reference": "557f25c71987018a14f58ce730978d397bd76bd1"
             },
             "require-dev": {
                 "cvuorinen/phpdoc-markdown-public": "^0.2.0",
@@ -79,7 +79,7 @@
                 ]
             },
             "notification-url": "https://packagist.org/downloads/",
-            "time": "2020-09-12T02:31:45+00:00"
+            "time": "2020-09-28T10:27:20+00:00"
         },
         {
             "name": "wpml/wp",

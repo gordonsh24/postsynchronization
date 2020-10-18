@@ -18,7 +18,7 @@
   "minimum-stability": "dev",
   "prefer-stable": true,
   "require": {
-    "wpml/fp": "dev-develop",
+    "wpml/fp": "dev-eithr-improvements",
     "wpml/wp": "dev-develop",
     "wpml/collect": "dev-wpml-collect-rename"
   },
