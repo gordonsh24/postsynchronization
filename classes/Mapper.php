@@ -85,7 +85,7 @@ class Mapper {
 	 *
 	 * @return Maybe
 	 */
-	public static function getTargetUrl( \WP_Post $post ) {
+	public static function getTargetUrl( $post ) {
 		$fn = function () use ( $post ) {
 			if ( ! PostSynchronizationSettings::hasAnyActiveSynchronization( $post->ID ) ) {
 				return Maybe::nothing();
