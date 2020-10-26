@@ -5,7 +5,6 @@ namespace PostSynchronization;
 
 
 use WPML\FP\Curryable;
-use WPML\FP\Either;
 
 /**
  * Class Logger
@@ -18,8 +17,16 @@ class Logger {
 
 	public static function init() {
 		self::curryN( 'logSyncError', 2, function ( $post, string $error ) {
-			update_post_meta( $post->ID, 'post-sync-error', $error );
+			self::log( sprintf( 'Sync error for post %d -> %s', $post->ID, $error ) );
 		} );
+	}
+
+	public static function log( $msg ) {
+		file_put_contents( self::getFile(), $msg . PHP_EOL, FILE_APPEND );
+	}
+
+	private static function getFile(): string {
+		return WP_CONTENT_DIR . '/ps-log.txt';
 	}
 }
 
