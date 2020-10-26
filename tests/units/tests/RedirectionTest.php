@@ -72,7 +72,7 @@ class RedirectionTest extends \WP_Mock\Tools\TestCase {
 		$query        = $this->getMockBuilder( '\WP_Query' )->getMock();
 		$query->query = [ 'name' => 'my-post' ];
 
-		\WP_Mock::userFunction( 'wp_redirect', [
+		\WP_Mock::userFunction( 'PostSynchronization\wp_redirect', [
 			'times' => 1,
 			'args'  => [ $externalPost, 301 ],
 		] );

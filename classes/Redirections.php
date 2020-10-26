@@ -16,7 +16,7 @@ class Redirections {
 	public static function redirectPost( $posts, \WP_Query $query ) {
 		if ( count( $posts ) === 1 && strlen( $query->query['name'] ) ) {
 			$post = current( $posts );
-			Mapper::getTargetUrl( $post )->map( partialRight( 'wp_redirect', 301 ) );
+			Mapper::getTargetUrl( $post )->map( partialRight( '\PostSynchronization\wp_redirect', 301 ) );
 		}
 
 		return $posts;

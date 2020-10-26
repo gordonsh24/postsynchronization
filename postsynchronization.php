@@ -11,6 +11,7 @@ Text Domain: postsynchronization
 */
 
 require_once 'vendor/autoload.php';
+require_once 'classes/wrapper-functions.php';
 
 \PostSynchronization\Initializer::addHooks();
 
