@@ -29,8 +29,8 @@ trait TaxonomiesMock {
 		$this->categories[ $postId ] = $categoryIds;
 	}
 
-	public function setPostTags( $postId, $tagIds ) {
-		$this->tags[ $postId ] = $tagIds;
+	public function setPostTags( $postId, $tags ) {
+		$this->tags[ $postId ] = $tags;
 	}
 
 }

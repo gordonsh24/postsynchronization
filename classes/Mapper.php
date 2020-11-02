@@ -5,7 +5,9 @@ namespace PostSynchronization;
 
 
 use PostSynchronization\Cache\CacheIntegrator;
+use PostSynchronization\Tags\Sync;
 use WPML\FP\Curryable;
+use WPML\FP\Fns;
 use WPML\FP\Lst;
 use WPML\FP\Maybe;
 use WPML\FP\Obj;
@@ -131,13 +133,13 @@ class Mapper {
 	}
 
 	private static function mapTags( \WP_Post $post, SiteData $siteData ): string {
-		$tagIds = wp_get_post_tags( $post->ID, [ 'fields' => 'ids' ] );
+		$tagNames = wp_get_post_tags( $post->ID, [ 'fields' => 'names' ] );
 
-		$map = function ( $id ) use ( $siteData ) {
-			return \wpml_collect( $siteData->tagsMap )->get( $id, false );
+		$map = function ( $name ) use ( $siteData ) {
+			return Sync::createIfNotExist( $siteData, $name )->map( Obj::prop( 'id' ) )->getOrElse( null );
 		};
 
-		return \wpml_collect( $tagIds )
+		return \wpml_collect( $tagNames )
 			->map( $map )
 			->filter()
 			->unique()

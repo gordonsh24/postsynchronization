@@ -29,35 +29,6 @@ class OnPostSaveTest extends \WP_Mock\Tools\TestCase {
 		$this->setUpCategories();
 		$this->setUpMapperMock();
 
-		! defined( 'POST_SYNC_SITES' ) && define( 'POST_SYNC_SITES', [
-			[
-				'name'          => 'gdzienazabieg',
-				'url'           => 'http://gdzienazabieg.test/',
-				'user'          => 'admin',
-				'password'      => 'password',
-				'categoriesMap' => [
-					2 => 4,
-					3 => 2,
-				],
-				'tagsMap'       => [
-					6  => 26,
-					8  => 28,
-					11 => 31,
-				],
-				'authorsMap'    => [
-					1 => 11,
-					2 => 12,
-				],
-			],
-			[
-				'name'          => 'develop',
-				'url'           => 'http://develop.test/',
-				'user'          => 'admin',
-				'password'      => 'password',
-				'categoriesMap' => [],
-			]
-		] );
-
 		\WP_Mock::userFunction( 'is_wp_error', [
 			'return' => function ( $param ) {
 				return $param instanceof \WP_Error;
@@ -79,13 +50,16 @@ class OnPostSaveTest extends \WP_Mock\Tools\TestCase {
 		$post = $this->createSamplePost();
 		$this->setPostCategories( $post->ID, [ 5, 2, 3 ] );
 		$this->mockPostType( $post->ID, 'post' );
-		$this->setPostTags( $post->ID, [ 2, 8, 11 ] );
+		$this->setPostTags( $post->ID, [ 'tag1', 'tag2', 'tag3' ] );
 
 		$_POST = [ 'some' => 'data' ];
 
 		update_post_meta( $post->ID, PostSynchronizationSettings::OPTION_NAME, [ 'gdzienazabieg' ] );
 
-		$this->mockPostSyncRequest( $post, 0, '1,4,2', '28,31' );
+		$this->mockPostSyncRequest( $post, 0, '1,4,2', '101,102,103' );
+		$this->mockFindTagRequest( 'tag1', 101 );
+		$this->mockFindTagRequest( 'tag2', 102 );
+		$this->mockFindTagRequest( 'tag3', 103 );
 
 		$handler = OnPostSave::onPostSave();
 		$handler( $post->ID, $post );
@@ -244,6 +218,27 @@ class OnPostSaveTest extends \WP_Mock\Tools\TestCase {
 				'body'     => json_encode( [
 					'id'   => $post->ID + 100,
 					'link' => 'http://gdzieniazabieg.test/external_post',
+				] ),
+			]
+		);
+	}
+
+	private function mockFindTagRequest( $tagName, $expectedRemoteTagId ) {
+		$this->expectRemoteGet(
+			'http://gdzienazabieg.test//wp-json/wp/v2/tags',
+			[
+				'search' => $tagName
+			],
+			[
+				'response' => [
+					'status'  => '200',
+					'message' => 'OK',
+				],
+				'body'     => json_encode( [
+					[
+						'id'   => $expectedRemoteTagId,
+						'name' => $tagName,
+					]
 				] ),
 			]
 		);

@@ -18,3 +18,7 @@ require_once 'classes/wrapper-functions.php';
 if ( defined( 'WP_CLI' ) ) {
 	\PostSynchronization\Migrations\Migrations::defineCommand();
 }
+
+//$r = \PostSynchronization\Tags\Sync::createIfNotExist( \PostSynchronization\SitesConfiguration::getByName( 'gdzienazabieg.test' ), 'TagM' );
+//var_dump( $r );
+//die;

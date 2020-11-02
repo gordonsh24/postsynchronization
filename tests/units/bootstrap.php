@@ -20,6 +20,35 @@ require_once './mocks/TaxonomiesMock.php';
 require_once './mocks/MapperMock.php';
 require_once './mocks/TransientMock.php';
 
+! defined( 'POST_SYNC_SITES' ) && define( 'POST_SYNC_SITES', [
+	[
+		'name'          => 'gdzienazabieg',
+		'url'           => 'http://gdzienazabieg.test/',
+		'user'          => 'admin',
+		'password'      => 'password',
+		'categoriesMap' => [
+			2 => 4,
+			3 => 2,
+		],
+		'tagsMap'       => [
+			6  => 26,
+			8  => 28,
+			11 => 31,
+		],
+		'authorsMap'    => [
+			1 => 11,
+			2 => 12,
+		],
+	],
+	[
+		'name'          => 'develop',
+		'url'           => 'http://develop.test/',
+		'user'          => 'admin',
+		'password'      => 'password',
+		'categoriesMap' => [],
+	]
+] );
+
 FunctionMocker::init(
 	[
 		'blacklist' => [
