@@ -6,6 +6,7 @@ namespace PostSynchronization\Migrations;
 
 use PostSynchronization\OnPostSave;
 use WPML\FP\Fns;
+use WPML\FP\Logic;
 use WPML\FP\Obj;
 use function WPML\FP\pipe;
 
@@ -16,17 +17,17 @@ class Resync {
 
 		$getPost = Fns::unary( '\get_post' );
 
-		$logPost = Fns::tap( function ( $post ) use ( $observer ) {
-			call_user_func( $observer, sprintf( 'Post (%d) -> %s', $post->ID, $post->post_title ) );
-		} );
+		$logPost = function ( $post, $index, $count ) use ( $observer ) {
+			call_user_func( $observer, sprintf( '%d / %d - Post (%d) -> %s', $index, $count, $post->ID, $post->post_title ) );
+		};
 
-		$syncPost = pipe( $logPost, Fns::converge( OnPostSave::onPostSave(), [ Obj::prop( 'ID' ), Fns::identity() ] ) );
+		$syncPost = Fns::converge( OnPostSave::onPostSave(), [ Obj::prop( 'ID' ), Fns::identity() ] );
 
-
-		\wpml_collect( self::getAllPosts() )
-			->map( $getPost )
-			->filter()
-			->map( $syncPost );
+		$posts = pipe( Fns::map( $getPost ), Fns::filter( Logic::isNotNull() ) )( self::getAllPosts() );
+		foreach ( $posts as $index => $post ) {
+			$logPost( $post, $index, count( $posts ) );
+			$syncPost( $post );
+		}
 	}
 
 	private static function getAllPosts() {
@@ -35,6 +36,7 @@ class Resync {
 		$sql = "
 			SELECT DISTINCT source_id 
 			FROM {$wpdb->prefix}wp_ps_mapping
+			WHERE `type` != 'media' 
 		";
 
 		return $wpdb->get_col( $sql );

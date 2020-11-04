@@ -15,6 +15,12 @@ class APITest extends \WP_Mock\Tools\TestCase {
 		\WP_Mock::setUp();
 
 		$this->setUpRemotePostMock();
+
+		\WP_Mock::userFunction( 'is_wp_error', [
+			'return' => function ( $param ) {
+				return $param instanceof \WP_Error;
+			}
+		] );
 	}
 
 	public function tearDown(): void {
@@ -76,7 +82,7 @@ class APITest extends \WP_Mock\Tools\TestCase {
 	 * @test
 	 */
 	public function find_gets_tag() {
-		$tagName = 'tag1';
+		$tagName = 'Some text';
 		$tag     = [
 			'id'   => 12,
 			'name' => $tagName,
@@ -92,7 +98,13 @@ class APITest extends \WP_Mock\Tools\TestCase {
 					'status'  => '200',
 					'message' => 'OK',
 				],
-				'body'     => json_encode( [ $tag ] ),
+				'body'     => json_encode( [
+					[
+						'id'   => 11,
+						'name' => 'Some text additional'
+					],
+					$tag
+				] ),
 			]
 		);
 

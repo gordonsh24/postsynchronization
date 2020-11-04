@@ -11,6 +11,8 @@ use WPML\FP\Either;
 use WPML\FP\Fns;
 use WPML\FP\Logic;
 use WPML\FP\Lst;
+use WPML\FP\Obj;
+use WPML\FP\Relation;
 use function WPML\FP\pipe;
 
 /**
@@ -34,11 +36,13 @@ class API {
 				'body'   => [ 'search' => $name ],
 			] );
 
+			$findExact = Lst::find( Relation::propEq( 'name', $name ) ) ;
+
 			return Either::of( $response )
 			             ->filter( RestUtils::checkResponseMsg( 'OK' ) )
 			             ->map( RestUtils::getBody() )
 			             ->filter( pipe( Logic::isEmpty(), Logic::not() ) )
-			             ->bimap( Fns::always( 'Tag not found' ), Lst::nth( 0 ) );
+			             ->bimap( Fns::always( 'Tag not found' ), $findExact );
 		} );
 
 		self::curryN( 'create', 2, function ( SiteData $siteData, string $name ) {

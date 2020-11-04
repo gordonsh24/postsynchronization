@@ -16,7 +16,7 @@ class Logger {
 	use Curryable;
 
 	public static function init() {
-		self::curryN( 'logSyncError', 2, function ( $post, string $error ) {
+		self::curryN( 'logSyncError', 2, function ( $post,  $error ) {
 			self::log( sprintf( 'Sync error for post %d -> %s', $post->ID, $error ) );
 		} );
 	}
