@@ -5,6 +5,7 @@ namespace PostSynchronization;
 
 
 use WPML\FP\Curryable;
+use WPML\FP\Obj;
 
 /**
  * Class Logger
@@ -23,6 +24,14 @@ class Logger {
 
 	public static function log( $msg ) {
 		file_put_contents( self::getFile(), $msg . PHP_EOL, FILE_APPEND );
+	}
+
+	public static function logResponse( $url, $params, $response ) {
+		$errMsg = is_wp_error($response) ? 'Timeout' : Obj::prop('body', $response);
+		$code = Obj::pathOr(500, ['response', 'code'], $response);
+
+		self::log( sprintf( '%s - [%d] %s', date( 'Y-m-d H:i:s' ), $code, $errMsg ) );
+		self::log( json_encode( $params ) );
 	}
 
 	private static function getFile(): string {

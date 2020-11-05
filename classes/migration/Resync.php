@@ -15,6 +15,7 @@ class Resync {
 
 	public static function run( $observer ) {
 		RestUtils::$timeout = 15;
+		RestUtils::$logFailedRequest = true;
 		$_POST['tmp'] = true;
 
 		$getPost = Fns::unary( '\get_post' );

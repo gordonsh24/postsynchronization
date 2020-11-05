@@ -15,6 +15,7 @@ class CheckTags {
 
 	public static function run( $observer ) {
 		RestUtils::$timeout = 15;
+		RestUtils::$logFailedRequest = true;
 
 		$appendProp = function ( $propName, $fn ) {
 			return Fns::converge( Obj::assoc( $propName ), [ $fn, Fns::identity() ] );

@@ -6,6 +6,7 @@ namespace PostSynchronization;
 
 use WPML\FP\Curryable;
 use WPML\FP\Json;
+use WPML\FP\Lst;
 use WPML\FP\Obj;
 use WPML\FP\Relation;
 use function WPML\FP\pipe;
@@ -24,6 +25,7 @@ class RestUtils {
 	use Curryable;
 
 	public static $timeout = 5;
+	public static $logFailedRequest = false;
 
 	public static function buildAuth( SiteData $siteData ): string {
 		return 'Basic ' . base64_encode( $siteData->user . ':' . $siteData->password );
@@ -42,7 +44,12 @@ class RestUtils {
 		self::curryN( 'request', 2, function ( $url, $params ) {
 			$default = [ 'timeout' => self::$timeout ];
 
-			return wp_remote_post( $url, array_merge( $default, $params ) );
+			$res = wp_remote_post( $url, array_merge( $default, $params ) );
+			if ( self::$logFailedRequest && ! Lst::includes( wp_remote_retrieve_response_code( $res ), [ 200, 201, 202, 203, 204 ] ) ) {
+				Logger::logResponse( $url, $params, $res );
+			}
+
+			return $res;
 		} );
 
 	}
