@@ -61,9 +61,9 @@ class Actions {
 	public static function init() {
 
 		self::curryN( 'create', 2, function ( SiteData $siteData, \WP_Post $post ) {
-			$response = wp_remote_post( self::createUrl( $siteData, $post ), [
+			$response = RestUtils::request( self::createUrl( $siteData, $post ), [
 				'headers' => [
-					'Authorization' => self::buildAuth( $siteData ),
+					'Authorization' => RestUtils::buildAuth( $siteData ),
 				],
 				'body' => Mapper::postData( $post, $siteData, self::synchronizeFeatureImage( $siteData, $post ) ),
 			] );
@@ -82,9 +82,9 @@ class Actions {
 		} );
 
 		self::curryN( 'update', 3, function ( SiteData $siteData, int $targetPostId, \WP_Post $post ) {
-			$response = wp_remote_post( self::updateUrl( $siteData, $targetPostId, $post ), [
+			$response = RestUtils::request( self::updateUrl( $siteData, $targetPostId, $post ), [
 				'headers' => [
-					'Authorization' => self::buildAuth( $siteData ),
+					'Authorization' => RestUtils::buildAuth( $siteData ),
 				],
 				'body'    => Mapper::postData( $post, $siteData, self::synchronizeFeatureImage( $siteData, $post ) ),
 			] );
@@ -93,9 +93,9 @@ class Actions {
 		} );
 
 		self::curryN( 'delete', 3, function ( SiteData $siteData, int $targetPostId, \WP_Post $post) {
-			$response = wp_remote_post( self::updateUrl( $siteData, $targetPostId, $post ), [
+			$response = RestUtils::request( self::updateUrl( $siteData, $targetPostId, $post ), [
 				'headers' => [
-					'Authorization' => self::buildAuth( $siteData ),
+					'Authorization' => RestUtils::buildAuth( $siteData ),
 				],
 				'method'  => 'DELETE',
 			] );

@@ -23,7 +23,7 @@ class API {
 		self::curryN( 'getByID', 3, function ( SiteData $site, $id, $type ) {
 			$url = sprintf( '%s/wp-json/wp/v2/%ss', $site->url, $type );
 
-			$response = wp_remote_post( $url, [
+			$response = RestUtils::request( $url, [
 				'method' => 'GET',
 				'body'   => [ 'include' => [ $id ], 'per_page' => 1 ],
 			] );

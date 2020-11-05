@@ -31,7 +31,7 @@ class API {
 	public static function init() {
 
 		self::curryN( 'find', 2, function ( SiteData $siteData, string $name ) {
-			$response = wp_remote_post( self::createUrl( $siteData ), [
+			$response = RestUtils::request( self::createUrl( $siteData ), [
 				'method' => 'GET',
 				'body'   => [ 'search' => $name ],
 			] );
@@ -46,7 +46,7 @@ class API {
 		} );
 
 		self::curryN( 'create', 2, function ( SiteData $siteData, string $name ) {
-			$response = wp_remote_post( self::createUrl( $siteData ), [
+			$response = RestUtils::request( self::createUrl( $siteData ), [
 				'headers' => [
 					'Authorization' => RestUtils::buildAuth( $siteData ),
 				],

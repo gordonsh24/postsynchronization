@@ -3,6 +3,7 @@
 namespace PostSynchronization\Migrations;
 
 use PostSynchronization\Posts\API;
+use PostSynchronization\RestUtils;
 use PostSynchronization\SitesConfiguration;
 use WPML\FP\Fns;
 use WPML\FP\Lst;
@@ -13,6 +14,8 @@ use function WPML\FP\pipe;
 class CheckTags {
 
 	public static function run( $observer ) {
+		RestUtils::$timeout = 15;
+
 		$appendProp = function ( $propName, $fn ) {
 			return Fns::converge( Obj::assoc( $propName ), [ $fn, Fns::identity() ] );
 		};

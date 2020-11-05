@@ -25,9 +25,9 @@ trait RemotePostMock {
 	}
 
 
-	public function expectRemotePost( string $url, array $headers, array $body, array $response ) {
+	public function expectRemotePost( string $url, array $headers, array $body, array $response, $timeout = 5 ) {
 		\WP_Mock::userFunction( 'wp_remote_post', [
-			'args'   => [ $url, [ 'headers' => $headers, 'body' => $body ] ],
+			'args'   => [ $url, [ 'timeout' => $timeout, 'headers' => $headers, 'body' => $body ] ],
 			'times'  => 1,
 			'return' => function ( $actualUrls, $params ) use ( $url, $headers, $body, $response ) {
 				$this->assertEquals( $url, $actualUrls );
@@ -39,9 +39,9 @@ trait RemotePostMock {
 		] );
 	}
 
-	public function expectRemoteGet( string $url, array $body, array $response ) {
+	public function expectRemoteGet( string $url, array $body, array $response, $timeout = 5 ) {
 		\WP_Mock::userFunction( 'wp_remote_post', [
-			'args'   => [ $url, [ 'method' => 'GET', 'body' => $body ] ],
+			'args'   => [ $url, [ 'timeout' => $timeout, 'method' => 'GET', 'body' => $body ] ],
 			'times'  => 1,
 			'return' => function ( $actualUrls, $params ) use ( $url, $body, $response ) {
 				$this->assertEquals( $url, $actualUrls );
@@ -52,9 +52,9 @@ trait RemotePostMock {
 		] );
 	}
 
-	public function expectDeleteRemotePost( string $url, array $headers, array $response ) {
+	public function expectDeleteRemotePost( string $url, array $headers, array $response, $timeout = 5 ) {
 		\WP_Mock::userFunction( 'wp_remote_post', [
-			'args'   => [ $url, [ 'headers' => $headers, 'method' => 'DELETE' ] ],
+			'args'   => [ $url, [ 'timeout' => $timeout, 'headers' => $headers, 'method' => 'DELETE' ] ],
 			'times'  => 1,
 			'return' => function ( $actualUrls, $params ) use ( $url, $headers, $response ) {
 				$this->assertEquals( $url, $actualUrls );

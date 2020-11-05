@@ -5,6 +5,7 @@ namespace PostSynchronization\Migrations;
 
 
 use PostSynchronization\OnPostSave;
+use PostSynchronization\RestUtils;
 use WPML\FP\Fns;
 use WPML\FP\Logic;
 use WPML\FP\Obj;
@@ -13,6 +14,7 @@ use function WPML\FP\pipe;
 class Resync {
 
 	public static function run( $observer ) {
+		RestUtils::$timeout = 15;
 		$_POST['tmp'] = true;
 
 		$getPost = Fns::unary( '\get_post' );
