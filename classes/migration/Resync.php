@@ -39,7 +39,7 @@ class Resync {
 		$sql = "
 			SELECT DISTINCT source_id 
 			FROM {$wpdb->prefix}wp_ps_mapping
-			WHERE `type` != 'media' 
+			WHERE `type` != 'media'		
 		";
 
 		return $wpdb->get_col( $sql );

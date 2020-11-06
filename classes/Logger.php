@@ -30,7 +30,7 @@ class Logger {
 		$errMsg = is_wp_error($response) ? 'Timeout' : Obj::prop('body', $response);
 		$code = Obj::pathOr(500, ['response', 'code'], $response);
 
-		self::log( sprintf( '%s - [%d] %s', date( 'Y-m-d H:i:s' ), $code, $errMsg ) );
+		self::log( sprintf( '%s - [%d] %s %s', date( 'Y-m-d H:i:s' ), $code, $url, $errMsg ) );
 		self::log( json_encode( $params ) );
 	}
 

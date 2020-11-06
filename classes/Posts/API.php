@@ -25,6 +25,9 @@ class API {
 
 			$response = RestUtils::request( $url, [
 				'method' => 'GET',
+				'headers' => [
+					'Authorization' => RestUtils::buildAuth( $site ),
+				],
 				'body'   => [ 'include' => [ $id ], 'per_page' => 1 ],
 			] );
 

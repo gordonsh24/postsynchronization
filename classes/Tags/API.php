@@ -33,6 +33,9 @@ class API {
 		self::curryN( 'find', 2, function ( SiteData $siteData, string $name ) {
 			$response = RestUtils::request( self::createUrl( $siteData ), [
 				'method' => 'GET',
+				'headers' => [
+					'Authorization' => RestUtils::buildAuth( $siteData ),
+				],
 				'body'   => [ 'search' => $name ],
 			] );
 
