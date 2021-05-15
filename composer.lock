@@ -59,7 +59,7 @@
             "source": {
                 "type": "git",
                 "url": "https://git.onthegosystems.com/wpml-packages/fp.git",
-                "reference": "c831daed061f5bc584941e5b47b2b55b28775898"
+                "reference": "473a37c240e3cde3850f9e605388616cb746356e"
             },
             "require-dev": {
                 "cvuorinen/phpdoc-markdown-public": "^0.2.0",
@@ -79,7 +79,7 @@
                 ]
             },
             "notification-url": "https://packagist.org/downloads/",
-            "time": "2020-10-20T01:32:32+00:00"
+            "time": "2021-04-28T14:00:26+00:00"
         },
         {
             "name": "wpml/wp",
@@ -87,7 +87,7 @@
             "source": {
                 "type": "git",
                 "url": "https://git.onthegosystems.com/wpml-packages/wp.git",
-                "reference": "5681fdffe1f33b9bc218e0b614a595a2e0083f92"
+                "reference": "6e6995d0a1c83369b8fbf711a8abd82c0ba8f52e"
             },
             "require-dev": {
                 "antecedent/patchwork": "^2.0",
@@ -113,7 +113,7 @@
                 }
             ],
             "description": "Class and utilities to interface with WordPress from WPML",
-            "time": "2020-10-01T01:59:27+00:00"
+            "time": "2021-04-27T03:38:24+00:00"
         }
     ],
     "packages-dev": [
