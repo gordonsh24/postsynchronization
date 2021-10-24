@@ -4,6 +4,7 @@
 namespace PostSynchronization;
 
 
+use WPML\FP\Obj;
 use function WPML\FP\partialRight;
 
 class Redirections {
@@ -14,7 +15,7 @@ class Redirections {
 	}
 
 	public static function redirectPost( $posts, \WP_Query $query ) {
-		if ( count( $posts ) === 1 && strlen( $query->query['name'] ) ) {
+		if ( count( $posts ) === 1 && strlen( Obj::pathOr( '', [ 'query', 'name' ], $query ) ) ) {
 			$post = current( $posts );
 			Mapper::getTargetUrl( $post )->map( partialRight( '\PostSynchronization\wp_redirect', 301 ) );
 		}
