@@ -38,6 +38,10 @@ class CustomBox {
 			return;
 		}
 
+		if ( is_array( $postId ) ) {
+			$postId = array_shift( $postId );
+		}
+
 		$site = Obj::propOr( [], 'postsynchronization_site_name', $_POST );
 		PostSynchronizationSettings::saveSites( $postId, [ $site ] );
 	}
