@@ -18,7 +18,7 @@ class Logger {
 
 	public static function init() {
 		self::curryN( 'logSyncError', 2, function ( $post,  $error ) {
-			self::log( sprintf( 'Sync error for post %d -> %s', $post->ID, $error ) );
+			self::log( sprintf( 'Sync error for post %d -> %s', $post->ID, json_encode( $error ) ) );
 		} );
 	}
 
